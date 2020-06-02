@@ -1,0 +1,19 @@
+{
+    "name": "solital/katrina",
+    "description": "Official Solital ORM for database abstraction",
+    "keywords": [
+        "orm", "php", "database", "mysql", "abstraction", "pdo"
+    ],
+    "license": "MIT",
+    "authors": [
+        {"name": "Brenno Duarte de Lima", "email": "brenno.gnr@gmail.com"}
+    ],
+    "require": {
+        "php": "^7.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "Katrina\\": "src/"
+        }
+    }
+}
