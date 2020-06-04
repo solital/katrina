@@ -7,7 +7,6 @@ class Katrina extends CRUD
 {
     protected $table;
     protected $columns;
-    protected $columnsUpdate;
     protected $columnPrimaryKey;
 
     public function __construct(string $table, string $columnPrimaryKey, array $columns = null)
@@ -15,10 +14,5 @@ class Katrina extends CRUD
         $this->table = $table;
         $this->columnPrimaryKey = $columnPrimaryKey;
         $this->columns = $columns;
-    }
-
-    public function colUpdate(array $columnsUpdate)
-    {
-        $this->columnsUpdate = $columnsUpdate;
     }
 }

@@ -74,25 +74,21 @@ abstract class CRUD extends Custom
         }
     }
 
-    public function update(array $values = [], int $primarykey)
+    public function update(array $columns, array $values, int $primarykey)
     {
-        $countColumns = count($this->columnsUpdate);
-
         try {
-            $sql = "UPDATE $this->table SET ";
+            $this->sql = "UPDATE $this->table SET ";
 
-            for ($i=0; $i < $countColumns; $i++) {
-                $sql .= $this->columnsUpdate[$i]." = '$values[$i]'". ", ";
+            for ($i=0; $i < \count($columns); $i++) {
+                $this->sql .= "$columns[$i] = '$values[$i]',";
             }
 
-            $format = rtrim($sql, ", ");
-            $where = " WHERE $this->columnPrimaryKey = $primarykey;";
+            $this->sql = rtrim($this->sql, ", ");
+            $this->sql .= " WHERE $this->columnPrimaryKey = $primarykey;";
             
-            $sqlComplete = $format.$where;
-            
-            $stmt = DB::prepare($sqlComplete);
-            for ($i=0; $i < $countColumns; $i++) { 
-                $stmt->bindParam(':'.$this->columnsUpdate[$i], $values[$i]);
+            $stmt = DB::prepare($this->sql);
+            for ($i=0; $i < \count($columns); $i++) { 
+                $stmt->bindParam(':'.$columns[$i], $values[$i]);
             }
             $res = $stmt->execute();
             
