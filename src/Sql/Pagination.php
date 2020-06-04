@@ -1,6 +1,6 @@
 <?php
 
-namespace Katrina\Pagination;
+namespace Katrina\Sql;
 use Katrina\Sql\Create;
 use PDO;
 

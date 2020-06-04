@@ -3,7 +3,7 @@
 namespace Katrina\Sql;
 use Katrina\Connection\DB as DB;
 use Katrina\Exception\Exception;
-use Katrina\Pagination\Pagination;
+use Katrina\Sql\Pagination as Pagination;
 use PDO;
 
 abstract class Custom extends Pagination
