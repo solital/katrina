@@ -2,15 +2,20 @@
 
 namespace Katrina\Sql;
 use Katrina\Connection\DB as DB;
+use Katrina\Exception\Exception;
 use PDO;
 
 abstract class Create extends Types
 {   
     public function build(string $fetch = "")
     {
+        $fetch = strtoupper($fetch);
+        
         try {
+            $this->sql = rtrim($this->sql, ",");
             $stmt = DB::prepare($this->sql);
             $res = $stmt->execute();
+            
             if ($fetch == "ONLY") {
                 $res = $stmt->fetch(PDO::FETCH_ASSOC);
             } else if ($fetch == "ALL") {
