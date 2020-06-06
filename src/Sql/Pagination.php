@@ -2,6 +2,8 @@
 
 namespace Katrina\Sql;
 use Katrina\Sql\Create;
+use Katrina\Connection\DB as DB;
+use Katrina\Exception\Exception;
 use PDO;
 
 abstract class Pagination extends Create
