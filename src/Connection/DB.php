@@ -2,9 +2,10 @@
 
 namespace Katrina\Connection;
 use Katrina\Exception\Exception as Exception;
+use Katrina\Version;
 use PDO;
 
-abstract class DB
+abstract class DB extends Version
 {
     private static $pdo;
 
