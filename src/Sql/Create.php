@@ -7,6 +7,10 @@ use PDO;
 
 abstract class Create extends Types
 {   
+    /**
+     * Compiles the SQL code
+     * @param string $fetch "ONLY" for one result; "ALL" for all results
+     */
     public function build(string $fetch = "")
     {
         $fetch = strtoupper($fetch);
@@ -28,6 +32,9 @@ abstract class Create extends Types
         }
     }
 
+    /**
+     * Closes the table after it is created
+     */
     public function closeTable()
     {
         $this->sql = rtrim($this->sql, ",");
@@ -35,6 +42,10 @@ abstract class Create extends Types
         return $this;
     }
 
+    /**
+     * Starts creating a new table
+     * @param string $table table name
+     */
     public function createTable(string $table)
     {
         $this->sql = "CREATE TABLE IF NOT EXISTS $table (";
@@ -42,6 +53,9 @@ abstract class Create extends Types
         return $this;
     }
 
+    /**
+     * List all tables
+     */
     public function listTables()
     {
         $this->sql = "SHOW TABLES";
@@ -49,6 +63,10 @@ abstract class Create extends Types
         return $this;
     }
 
+    /**
+     * Describe a table
+     * @param string $table table name
+     */
     public function describeTable(string $table)
     {
         $this->sql = "DESCRIBE ".$table;
@@ -56,6 +74,10 @@ abstract class Create extends Types
         return $this;
     }
 
+    /**
+     * Drop a table
+     * @param string $table table name
+     */
     public function dropTable(string $table)
     {
         $this->sql = "DROP TABLE IF EXISTS ".$table;
@@ -63,6 +85,10 @@ abstract class Create extends Types
         return $this;
     }
 
+    /**
+     * Truncate a table
+     * @param string $table table name
+     */
     public function truncate($check_foreign_key = false)
     {
         $this->sql = "TRUNCATE TABLE $this->table;";
@@ -75,6 +101,11 @@ abstract class Create extends Types
         return $this;
     }
 
+    /**
+     * Dump a database
+     * @param string $database database name
+     * @param string $dump_dir dump directory
+     */
     public function dump(string $database, string $dump_dir)
     {
         \exec("mysqldump -u ".DB_CONFIG['USER']." -p".DB_CONFIG['PASS']." $database --routines > $dump_dir;");

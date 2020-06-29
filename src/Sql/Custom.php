@@ -8,6 +8,10 @@ use PDO;
 
 abstract class Custom extends Pagination
 {
+    /**
+     * Create custom SELECT command statement returning all data
+     * @param string $query custom select command
+     */
     public function customQueryAll(string $query)
     {
         try {
@@ -21,6 +25,10 @@ abstract class Custom extends Pagination
         }
     }
 
+    /**
+     * Create custom SELECT command statement returning a single data
+     * @param string $query custom select command
+     */
     public function customQueryOnly(string $query)
     {
         try {

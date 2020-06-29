@@ -7,8 +7,14 @@ use PDO;
 
 abstract class DB extends Version
 {
+    /**
+     * @var DB
+     */
     private static $pdo;
 
+    /**
+     * Creates an instance of the connection
+     */
     public static function getInstance()
     {
         try {
@@ -25,11 +31,19 @@ abstract class DB extends Version
         }
     }
 
+    /**
+     * PDO prepare command
+     * @param DB $sql
+     */
     public static function prepare($sql)
     {
         return self::getInstance()->prepare($sql);
     }
 
+    /**
+     * PDO query command
+     * @param DB $sql
+     */
     public static function query($sql)
     {
         return self::getInstance()->query($sql);

@@ -8,6 +8,14 @@ use PDO;
 
 abstract class Pagination extends Create
 {
+    /**
+     * Create a paging system
+     * @param string $table Table name
+     * @param int    $limit Insert a limit
+     * @param string $previous_name Arrow that will be displayed to return a value
+     * @param string $next_name Arrow that will be displayed to advance a value
+     * @param string $page Name that will be displayed in the url indicating the page where the user is
+     */
     public function pagination(string $table, int $limit, string $previous_name = "<<", string $next_name = ">>", string $page = "page")
     {
 

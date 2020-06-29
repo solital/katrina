@@ -6,6 +6,9 @@ use PDO;
 
 abstract class Types
 {
+    /**
+     * Inserts the SQL PRIMARY KEY command
+     */
     public function primary()
     {
         $this->sql = rtrim($this->sql, ",");
@@ -14,6 +17,9 @@ abstract class Types
         return $this;
     }
 
+    /**
+     * Inserts the SQL NOT NULL command
+     */
     public function notNull()
     {
         $this->sql = rtrim($this->sql, ",");
@@ -22,6 +28,10 @@ abstract class Types
         return $this;
     }
 
+    /**
+     * Changes a table in the database
+     * @param string $table Table name
+     */
     public function alter(string $table)
     {
         $this->sql = "ALTER TABLE `$table` ";
@@ -29,6 +39,9 @@ abstract class Types
         return $this;
     }
     
+    /**
+     * Adds a new column to the table
+     */
     public function add()
     {
         $this->sql .= "ADD COLUMN ";
@@ -36,6 +49,9 @@ abstract class Types
         return $this;
     }
 
+    /**
+     * Modify a table column
+     */
     public function modify()
     {
         $this->sql .= "MODIFY COLUMN ";
@@ -43,6 +59,10 @@ abstract class Types
         return $this;
     }
 
+    /**
+     * Change the table name
+     * @param string $old_column Old table column
+     */
     public function change(string $old_column)
     {
         $this->sql .= "CHANGE COLUMN `$old_column` ";
@@ -50,6 +70,11 @@ abstract class Types
         return $this;
     }
 
+    /**
+     * Renames the table
+     * @param string $old_table Old table name
+     * @param string $new_name New table name
+     */
     public function rename(string $old_table, string $new_name)
     {
         $this->sql .= "RENAME TABLE `$old_table` TO `$new_name`,";
@@ -57,6 +82,10 @@ abstract class Types
         return $this;
     }
 
+    /**
+     * Drop a table
+     * @param string $column Column name
+     */
     public function drop(string $column)
     {
         $this->sql .= "DROP COLUMN $column;";
@@ -64,6 +93,10 @@ abstract class Types
         return $this;
     }
 
+    /**
+     * Insert a foreign key
+     * @param string $foreign_key Foreign key name
+     */
     public function foreign(string $foreign_key)
     {   
         $this->sql .= "FOREIGN KEY (`$foreign_key`) ";
@@ -71,6 +104,10 @@ abstract class Types
         return $this;
     }
 
+    /**
+     * Inserts a constraint into an already created table
+     * @param string $constraint Constraint name
+     */
     public function constraint(string $constraint)
     {
         $this->sql .= "CONSTRAINT `$constraint` ";
@@ -78,6 +115,10 @@ abstract class Types
         return $this;
     }
 
+    /**
+     * Insert a constraint when creating a new table
+     * @param string $constraint Constraint name
+     */
     public function addConstraint(string $constraint)
     {
         $this->sql .= "ADD CONSTRAINT `$constraint` ";
@@ -85,6 +126,9 @@ abstract class Types
         return $this;
     }
     
+    /**
+     * 
+     */
     public function references(string $references, string $id)
     {
         $this->sql .= "REFERENCES `$references`(`$id`),";
