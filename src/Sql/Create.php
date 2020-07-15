@@ -35,10 +35,11 @@ abstract class Create extends Types
     /**
      * Closes the table after it is created
      */
-    public function closeTable()
+    public function closeTable(): Create
     {
         $this->sql = rtrim($this->sql, ",");
         $this->sql .= ");";
+
         return $this;
     }
 
@@ -46,7 +47,7 @@ abstract class Create extends Types
      * Starts creating a new table
      * @param string $table table name
      */
-    public function createTable(string $table)
+    public function createTable(string $table): Create
     {
         $this->sql = "CREATE TABLE IF NOT EXISTS $table (";
 
@@ -56,7 +57,7 @@ abstract class Create extends Types
     /**
      * List all tables
      */
-    public function listTables()
+    public function listTables(): Create
     {
         $this->sql = "SHOW TABLES";
 
@@ -67,7 +68,7 @@ abstract class Create extends Types
      * Describe a table
      * @param string $table table name
      */
-    public function describeTable(string $table)
+    public function describeTable(string $table): Create
     {
         $this->sql = "DESCRIBE ".$table;
 
@@ -78,7 +79,7 @@ abstract class Create extends Types
      * Drop a table
      * @param string $table table name
      */
-    public function dropTable(string $table)
+    public function dropTable(string $table): Create
     {
         $this->sql = "DROP TABLE IF EXISTS ".$table;
 
@@ -89,7 +90,7 @@ abstract class Create extends Types
      * Truncate a table
      * @param string $table table name
      */
-    public function truncate($check_foreign_key = false)
+    public function truncate($check_foreign_key = false): Create
     {
         $this->sql = "TRUNCATE TABLE $this->table;";
         if ($check_foreign_key == true) {

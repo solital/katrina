@@ -5,11 +5,31 @@ use Katrina\Sql\CRUD as CRUD;
 
 class Katrina extends CRUD
 {
+    /**
+     * @var string
+     */
     protected $table;
-    protected $columns;
+
+    /**
+     * @var string
+     */
     protected $columnPrimaryKey;
+
+    /**
+     * @var array
+     */
+    protected $columns;
+    
+    /**
+     * @var const
+     */
     public const KATRINA_VERSION = "0.2.0";
 
+    /**
+     * @param string $table
+     * @param string $columnPrimaryKey
+     * @param array $columns = null
+     */
     public function __construct(string $table, string $columnPrimaryKey, array $columns = null)
     {
         $this->table = $table;

@@ -1,8 +1,8 @@
 # Released Notes
 
-## v0.2.0 - (2020-06-29)
+## v1.0.0-beta - (2020-07-15)
 
-### Added
+### Fixed
 
-- Added partial support for PSR-12 and PSR-19
-- Added `error-view.php` for Exceptions
+- Fixed comments and PSR-12
+- Fixed `implode` bug in the` insert` method

@@ -20,7 +20,7 @@ abstract class Pagination extends Create
     {
 
         if ($limit == 0 || $limit <= 0) {
-            Exception::message("'pagination()' error - Division by zero");
+            Exception::alertMessage(null, "'pagination()' error - Division by zero");
         }
 
         $pg = (isset($_GET[$page])) ? (int)$_GET[$page] : 1;

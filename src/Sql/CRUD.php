@@ -4,7 +4,6 @@ namespace Katrina\Sql;
 use Katrina\Connection\DB as DB;
 use Katrina\Sql\Custom as Custom;
 use Katrina\Exception\Exception;
-use PDO;
 
 abstract class CRUD extends Custom
 {
@@ -42,7 +41,7 @@ abstract class CRUD extends Custom
      * @param string $where Optional. SQL WHERE command
      * @param string $columns Name of columns to be returned. "*" by default
      */
-    public function select(int $primaryKey = null, string $where = null, string $columns = "*")
+    public function select(int $primaryKey = null, string $where = null, string $columns = "*"): CRUD
     {
         $this->sql = "SELECT $columns FROM $this->table ";
 
@@ -64,7 +63,7 @@ abstract class CRUD extends Custom
      * @param int    $primaryKey Optional. Primary key of the table
      * @param string $columns Name of columns to be returned. "*" by default
      */
-    public function innerJoin(string $columnForeign, string $columnForeignKey, int $primaryKey = null, string $columns = "*")
+    public function innerJoin(string $columnForeign, string $columnForeignKey, int $primaryKey = null, string $columns = "*"): CRUD
     {
         $this->sql = "SELECT $columns FROM $this->table a INNER JOIN $columnForeign b
         ON a.$this->columnPrimaryKey=b.$columnForeignKey;";
@@ -81,10 +80,10 @@ abstract class CRUD extends Custom
      * SQL INSERT command
      * @param array $values The data that will be inserted in the table
      */
-    public function insert(array $values = [])
+    public function insert(array $values = []): bool
     {
         $countColumns = count($this->columns);
-        $resColumns = implode($this->columns, ',');
+        $resColumns = implode(",", $this->columns);
 
         try {
             $this->sql = "INSERT INTO $this->table ($resColumns) VALUES ('". implode("','", $values) ."');";
@@ -107,7 +106,7 @@ abstract class CRUD extends Custom
      * @param array $values The data that will be updated in the table
      * @param int   $primaryKey Primary key of the table
      */
-    public function update(array $columns, array $values, int $primaryKey)
+    public function update(array $columns, array $values, int $primaryKey): bool
     {
         try {
             $this->sql = "UPDATE $this->table SET ";
@@ -135,7 +134,7 @@ abstract class CRUD extends Custom
      * SQL DELETE command
      * @param int $primaryKey Primary key of the table
      */
-    public function delete(int $primarykey)
+    public function delete(int $primarykey): CRUD
     {
         $this->sql = "DELETE FROM $this->table WHERE $this->columnPrimaryKey = $primarykey;";
 
@@ -147,7 +146,7 @@ abstract class CRUD extends Custom
      * @param string $procedure Procedure name
      * @param array  $params Procedure params. Null by default
      */
-    public function call(string $procedure, array $params = null)
+    public function call(string $procedure, array $params = null): CRUD
     {
         $values = null;
         if ($params) {

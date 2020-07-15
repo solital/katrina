@@ -1,15 +1,13 @@
 <?php
 
 namespace Katrina\Sql;
-use Katrina\Connection\DB as DB;
-use PDO;
 
 abstract class Types
 {
     /**
      * Inserts the SQL PRIMARY KEY command
      */
-    public function primary()
+    public function primary(): Types
     {
         $this->sql = rtrim($this->sql, ",");
         $this->sql .= " PRIMARY KEY ";
@@ -20,7 +18,7 @@ abstract class Types
     /**
      * Inserts the SQL NOT NULL command
      */
-    public function notNull()
+    public function notNull(): Types
     {
         $this->sql = rtrim($this->sql, ",");
         $this->sql .= " NOT NULL,";
@@ -29,10 +27,9 @@ abstract class Types
     }
 
     /**
-     * Changes a table in the database
      * @param string $table Table name
      */
-    public function alter(string $table)
+    public function alter(string $table): Types
     {
         $this->sql = "ALTER TABLE `$table` ";
 
@@ -42,7 +39,7 @@ abstract class Types
     /**
      * Adds a new column to the table
      */
-    public function add()
+    public function add(): Types
     {
         $this->sql .= "ADD COLUMN ";
 
@@ -52,7 +49,7 @@ abstract class Types
     /**
      * Modify a table column
      */
-    public function modify()
+    public function modify(): Types
     {
         $this->sql .= "MODIFY COLUMN ";
 
@@ -60,10 +57,9 @@ abstract class Types
     }
 
     /**
-     * Change the table name
      * @param string $old_column Old table column
      */
-    public function change(string $old_column)
+    public function change(string $old_column): Types
     {
         $this->sql .= "CHANGE COLUMN `$old_column` ";
 
@@ -71,11 +67,10 @@ abstract class Types
     }
 
     /**
-     * Renames the table
      * @param string $old_table Old table name
      * @param string $new_name New table name
      */
-    public function rename(string $old_table, string $new_name)
+    public function rename(string $old_table, string $new_name): Types
     {
         $this->sql .= "RENAME TABLE `$old_table` TO `$new_name`,";
 
@@ -83,10 +78,9 @@ abstract class Types
     }
 
     /**
-     * Drop a table
      * @param string $column Column name
      */
-    public function drop(string $column)
+    public function drop(string $column): Types
     {
         $this->sql .= "DROP COLUMN $column;";
 
@@ -94,10 +88,9 @@ abstract class Types
     }
 
     /**
-     * Insert a foreign key
      * @param string $foreign_key Foreign key name
      */
-    public function foreign(string $foreign_key)
+    public function foreign(string $foreign_key): Types
     {   
         $this->sql .= "FOREIGN KEY (`$foreign_key`) ";
 
@@ -105,10 +98,9 @@ abstract class Types
     }
 
     /**
-     * Inserts a constraint into an already created table
      * @param string $constraint Constraint name
      */
-    public function constraint(string $constraint)
+    public function constraint(string $constraint): Types
     {
         $this->sql .= "CONSTRAINT `$constraint` ";
 
@@ -116,10 +108,9 @@ abstract class Types
     }
 
     /**
-     * Insert a constraint when creating a new table
      * @param string $constraint Constraint name
      */
-    public function addConstraint(string $constraint)
+    public function addConstraint(string $constraint): Types
     {
         $this->sql .= "ADD CONSTRAINT `$constraint` ";
 
@@ -127,16 +118,20 @@ abstract class Types
     }
     
     /**
-     * 
+     * @param string $references
+     * @param string $id
      */
-    public function references(string $references, string $id)
+    public function references(string $references, string $id): Types
     {
         $this->sql .= "REFERENCES `$references`(`$id`),";
 
         return $this;
     }
 
-    public function default(string $default)
+    /**
+     * @param string $default
+     */
+    public function default(string $default): Types
     {
         $this->sql = rtrim($this->sql, ",");
         $this->sql .= " DEFAULT '$default',";
@@ -144,7 +139,10 @@ abstract class Types
         return $this;
     }
 
-    public function unique()
+    /**
+     * 
+     */
+    public function unique(): Types
     {
         $this->sql = rtrim($this->sql, ",");    
         $this->sql .= " UNIQUE,";
@@ -152,7 +150,7 @@ abstract class Types
         return $this;
     }
 
-    public function unsigned()
+    public function unsigned(): Types
     {
         $this->sql = rtrim($this->sql, ",");
         $this->sql .= " UNSIGNED,";
@@ -160,7 +158,10 @@ abstract class Types
         return $this;
     }
 
-    public function after(string $column)
+    /**
+     * @param string $column
+     */
+    public function after(string $column): Types
     {
         $comma = substr($this->sql, -1);
 
@@ -173,7 +174,7 @@ abstract class Types
         return $this;
     }
 
-    public function first()
+    public function first(): Types
     {
         $comma = substr($this->sql, -1);
 
@@ -186,7 +187,7 @@ abstract class Types
         return $this;
     }
 
-    public function increment()
+    public function increment(): Types
     {
         $this->sql = rtrim($this->sql, ",");
         $this->sql .= " AUTO_INCREMENT,";
@@ -194,126 +195,189 @@ abstract class Types
         return $this;
     }
 
-    public function boolean(string $field)
+    /**
+     * @param string $field
+     */
+    public function boolean(string $field): Types
     {
         $this->sql .= "`$field` BOOLEAN,";
         
         return $this;
     }
 
-    public function decimal(string $field, int $value1, int $value2)
+    /**
+     * @param string $field
+     * @param int $value1
+     * @param int $value2
+     */
+    public function decimal(string $field, int $value1, int $value2): Types
     {
         $this->sql .= "`$field` DECIMAL($value1, $value2),";
         
         return $this;
     }
 
-    public function char(string $field, int $size)
+    /**
+     * @param string $field
+     * @param int $size
+     */
+    public function char(string $field, int $size): Types
     {
         $this->sql .= "`$field` CHAR($size),";
         
         return $this;
     }
     
-    public function varchar(string $field, int $size)
+    /**
+     * @param string $field
+     * @param string $size
+     */
+    public function varchar(string $field, int $size): Types
     {
         $this->sql .= "`$field` VARCHAR($size),";   
         
         return $this;
     }
 
-    public function tinytext(string $field)
+    /**
+     * @param string $field
+     */
+    public function tinytext(string $field): Types
     {
         $this->sql .= "`$field` TINYTEXT,";
         
         return $this;
     }
 
-    public function mediumtext(string $field)
+    /**
+     * @param string $field
+     */
+    public function mediumtext(string $field): Types
     {
         $this->sql .= "`$field` MEDIUMTEXT,";
         
         return $this;
     }
 
-    public function longtext(string $field)
+    /**
+     * @param string $field
+     */
+    public function longtext(string $field): Types
     {
         $this->sql .= "`$field` LONGTEXT,";
         
         return $this;
     }
     
-    public function text(string $field)
+    /**
+     * @param string $field
+     */
+    public function text(string $field): Types
     {
         $this->sql .= "`$field` TEXT,";
         
         return $this;
     }
 
-    public function tinyint(string $field, int $size)
+    /**
+     * @param string $field
+     * @param int $size
+     */
+    public function tinyint(string $field, int $size): Types
     {
         $this->sql .= "`$field` TINYINT($size),";
         
         return $this;
     }
 
-    public function smallint(string $field, int $size)
+    /**
+     * @param string $field
+     * @param int $size
+     */
+    public function smallint(string $field, int $size): Types
     {
         $this->sql .= "`$field` SMALLINT($size),";
         
         return $this;
     }
 
-    public function mediumint(string $field, int $size)
+    /**
+     * @param string $field
+     * @param int $size
+     */
+    public function mediumint(string $field, int $size): Types
     {
         $this->sql .= "`$field` MEDIUMINT($size),";
         
         return $this;
     }
 
-    public function bigint(string $field, int $size)
+    /**
+     * @param string $field
+     * @param int $size
+     */
+    public function bigint(string $field, int $size): Types
     {
         $this->sql .= "`$field` BIGINT($size),";
         
         return $this;
     }
 
-    public function int(string $field, int $size = 11)
+    /**
+     * @param string $field
+     * @param int $size = 11
+     */
+    public function int(string $field, int $size = 11): Types
     {
         $this->sql .= "`$field` INT($size),";
         
         return $this;
     }
 
-    public function date(string $field)
+    /**
+     * @param string $field
+     */
+    public function date(string $field): Types
     {
         $this->sql .= "`$field` DATE,";
         
         return $this;
     }
 
-    public function year(string $field)
+    /**
+     * @param string $field
+     */
+    public function year(string $field): Types
     {
         $this->sql .= "`$field` YEAR,";
         
         return $this;
     }
 
-    public function time(string $field)
+    /**
+     * @param string $field
+     */
+    public function time(string $field): Types
     {
         $this->sql .= "`$field` TIME,";
         
         return $this;
     }
 
-    public function datetime(string $field)
+    /**
+     * @param string $field
+     */
+    public function datetime(string $field): Types
     {
         $this->sql .= "`$field` DATETIME,";
         
         return $this;
     }
 
-    public function timestamp(string $field)
+    /**
+     * @param string $field
+     */
+    public function timestamp(string $field): Types
     {
         $this->sql .= "`$field` TIMESTAMP DEFAULT CURRENT_TIMESTAMP(),";
         

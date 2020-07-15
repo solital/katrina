@@ -2,10 +2,9 @@
 
 namespace Katrina\Connection;
 use Katrina\Exception\Exception as Exception;
-use Katrina\Version;
 use PDO;
 
-abstract class DB extends Version
+abstract class DB
 {
     /**
      * @var DB
@@ -15,7 +14,7 @@ abstract class DB extends Version
     /**
      * Creates an instance of the connection
      */
-    public static function getInstance()
+    public static function getInstance(): object
     {
         try {
             self::$pdo = new \PDO(DB_CONFIG['DRIVE'].":host=".DB_CONFIG['HOST'].
@@ -35,7 +34,7 @@ abstract class DB extends Version
      * PDO prepare command
      * @param DB $sql
      */
-    public static function prepare($sql)
+    public static function prepare($sql): object
     {
         return self::getInstance()->prepare($sql);
     }
@@ -44,7 +43,7 @@ abstract class DB extends Version
      * PDO query command
      * @param DB $sql
      */
-    public static function query($sql)
+    public static function query($sql): object
     {
         return self::getInstance()->query($sql);
     }

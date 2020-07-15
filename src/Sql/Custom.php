@@ -12,7 +12,7 @@ abstract class Custom extends Pagination
      * Create custom SELECT command statement returning all data
      * @param string $query custom select command
      */
-    public function customQueryAll(string $query)
+    public function customQueryAll(string $query): ?array
     {
         try {
             $stmt = DB::query($query);
