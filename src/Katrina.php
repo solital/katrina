@@ -23,7 +23,7 @@ class Katrina extends CRUD
     /**
      * @var const
      */
-    public const KATRINA_VERSION = "0.2.0";
+    public const KATRINA_VERSION = "1.0.0";
 
     /**
      * @param string $table

@@ -1,5 +1,11 @@
 # Released Notes
 
+## v1.0.0 - (2020-07-17)
+
+### Changed
+
+- Changed Katrina ORM to version 1.0.0
+
 ## v1.0.0-beta - (2020-07-15)
 
 ### Fixed
