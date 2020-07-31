@@ -34,6 +34,7 @@ abstract class Create extends Types
 
     /**
      * Closes the table after it is created
+     * @return Create
      */
     public function closeTable(): Create
     {
@@ -46,6 +47,7 @@ abstract class Create extends Types
     /**
      * Starts creating a new table
      * @param string $table table name
+     * @return Create
      */
     public function createTable(string $table): Create
     {
@@ -56,6 +58,7 @@ abstract class Create extends Types
 
     /**
      * List all tables
+     * @return Create
      */
     public function listTables(): Create
     {
@@ -67,6 +70,7 @@ abstract class Create extends Types
     /**
      * Describe a table
      * @param string $table table name
+     * @return Create
      */
     public function describeTable(string $table): Create
     {
@@ -78,6 +82,7 @@ abstract class Create extends Types
     /**
      * Drop a table
      * @param string $table table name
+     * @return Create
      */
     public function dropTable(string $table): Create
     {
@@ -89,8 +94,9 @@ abstract class Create extends Types
     /**
      * Truncate a table
      * @param string $table table name
+     * @return Create
      */
-    public function truncate($check_foreign_key = false): Create
+    public function truncate(bool $check_foreign_key = false): Create
     {
         $this->sql = "TRUNCATE TABLE $this->table;";
         if ($check_foreign_key == true) {

@@ -40,6 +40,7 @@ abstract class CRUD extends Custom
      * @param int    $primaryKey Optional. Primary key of the table
      * @param string $where Optional. SQL WHERE command
      * @param string $columns Name of columns to be returned. "*" by default
+     * @return CRUD
      */
     public function select(int $primaryKey = null, string $where = null, string $columns = "*"): CRUD
     {
@@ -50,7 +51,11 @@ abstract class CRUD extends Custom
         }
 
         if (isset($where)) {
-            $this->sql .= "WHERE ". $where;
+            if ($primaryKey != null) {
+                $this->sql .= "AND " . $where;
+            } else {
+                $this->sql .= "WHERE " . $where;
+            }
         }
 
         return $this;
@@ -58,41 +63,58 @@ abstract class CRUD extends Custom
 
     /**
      * SQL INNER JOIN command
-     * @param string $columnForeign Column name with foreign key
-     * @param string $columnForeignKey Column name with the primary key where the foreign key is
-     * @param int    $primaryKey Optional. Primary key of the table
+     * @param string $tableForeign Column name with foreign key
+     * @param array  $columnForeignKey Column name with the primary key and column where the foreign key is
+     * @param int    $where Optional. WHERE clause
      * @param string $columns Name of columns to be returned. "*" by default
      */
-    public function innerJoin(string $columnForeign, string $columnForeignKey, int $primaryKey = null, string $columns = "*"): CRUD
+    public function innerJoin(string $tableForeign, array $columnForeignKey, string $where = null, string $columns = "*"): CRUD
     {
-        $this->sql = "SELECT $columns FROM $this->table a INNER JOIN $columnForeign b
-        ON a.$this->columnPrimaryKey=b.$columnForeignKey;";
+        $this->sql = "SELECT $columns FROM $this->table a INNER JOIN $tableForeign b
+        ON a.$columnForeignKey[0]=b.$columnForeignKey[1];";
 
-        if ($primaryKey != null) {
+        if ($where != null) {
             $this->sql = rtrim($this->sql, ";");
-            $this->sql .= " WHERE a.$this->columnPrimaryKey = $primaryKey;";
+            $this->sql .= " WHERE $where";
         }
 
         return $this;
     }
 
-    /**
+     /**
      * SQL INSERT command
      * @param array $values The data that will be inserted in the table
+     * @param bool $lastId  Lat insert id. Default is "false"
      */
-    public function insert(array $values = []): bool
+    public function insert(array $values = [], bool $lastId = false)
     {
         $countColumns = count($this->columns);
         $resColumns = implode(",", $this->columns);
+        $values = implode("','", $values);
+
+        $this->sql = "INSERT INTO ".$this->table." (".($resColumns).") VALUES ( '".$values."' )";
+
+        if (strpos($values, "NOW()") !== false) {
+            $this->sql = str_replace("'NOW()'", "NOW()", $this->sql);
+        } elseif (strpos($values, "CURRENT_TIMESTAMP()") !== false) {
+            $this->sql = str_replace("'CURRENT_TIMESTAMP()'", "CURRENT_TIMESTAMP()", $this->sql);
+        }
 
         try {
-            $this->sql = "INSERT INTO $this->table ($resColumns) VALUES ('". implode("','", $values) ."');";
-            
             $stmt = DB::prepare($this->sql);
             for ($i=0; $i < $countColumns; $i++) { 
-                $stmt->bindParam(':'.$this->columns[$i], $values[$i]);
+                $stmt->bindValue(':'.$this->columns[$i], $values[$i]);
             }
             $res = $stmt->execute();
+            
+            if ($lastId == true) {
+                $lastId = DB::lastInsertId();
+            
+                return [
+                    'res' => $res,
+                    'lastId' => $lastId
+                ];
+            }
             
             return $res;
         } catch (\PDOException $e) {
@@ -104,9 +126,10 @@ abstract class CRUD extends Custom
      * SQL UPDATE command
      * @param array $columns The columns that will be updated
      * @param array $values The data that will be updated in the table
-     * @param int   $primaryKey Primary key of the table
+     * @param mixed $where WHERE clause
+     * @return bool
      */
-    public function update(array $columns, array $values, int $primaryKey): bool
+    public function update(array $columns, array $values, $where): bool
     {
         try {
             $this->sql = "UPDATE $this->table SET ";
@@ -116,7 +139,16 @@ abstract class CRUD extends Custom
             }
 
             $this->sql = rtrim($this->sql, ", ");
-            $this->sql .= " WHERE $this->columnPrimaryKey = $primaryKey;";
+
+            if (strpos($this->sql, "+")) {
+                $this->sql = str_replace("'", "", $this->sql);
+            }
+
+            if (is_int($where)) {
+                $this->sql .= " WHERE $this->columnPrimaryKey = $where;";
+            } elseif (is_string($where)) {
+                $this->sql .= " WHERE $where;";
+            }
             
             $stmt = DB::prepare($this->sql);
             for ($i=0; $i < \count($columns); $i++) { 
@@ -132,11 +164,29 @@ abstract class CRUD extends Custom
 
     /**
      * SQL DELETE command
-     * @param int $primaryKey Primary key of the table
+     * @param mixed  $value Primary key of the table
+     * @param string $column Column name
+     * @return CRUD
      */
-    public function delete(int $primarykey): CRUD
+    public function delete($value, string $column = NULL, bool $check_foreign_key = false): CRUD
     {
-        $this->sql = "DELETE FROM $this->table WHERE $this->columnPrimaryKey = $primarykey;";
+        $this->sql = "DELETE FROM $this->table WHERE $this->columnPrimaryKey = $value;";
+
+        if ($column != NULL) {
+            $this->sql = "DELETE FROM $this->table WHERE $column = $value;";
+        }
+
+        if (is_string($value)) {
+            $this->sql = 'DELETE FROM '.$this->table.' WHERE '.$this->columnPrimaryKey.' = "'.$value.'";';
+
+            if ($column != NULL) {
+                $this->sql = 'DELETE FROM '.$this->table.' WHERE '.$column.' = "'.$value.'";';
+            }
+        }
+
+        if ($check_foreign_key == true) {
+            $this->sql = "SET FOREIGN_KEY_CHECKS=0;".$this->sql."SET FOREIGN_KEY_CHECKS=1;";
+        }
 
         return $this;
     }
@@ -145,6 +195,7 @@ abstract class CRUD extends Custom
      * Call a database procedure
      * @param string $procedure Procedure name
      * @param array  $params Procedure params. Null by default
+     * @return CRUD
      */
     public function call(string $procedure, array $params = null): CRUD
     {

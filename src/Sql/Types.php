@@ -6,6 +6,7 @@ abstract class Types
 {
     /**
      * Inserts the SQL PRIMARY KEY command
+     * @return Types
      */
     public function primary(): Types
     {
@@ -17,6 +18,7 @@ abstract class Types
 
     /**
      * Inserts the SQL NOT NULL command
+     * @return Types
      */
     public function notNull(): Types
     {
@@ -28,6 +30,7 @@ abstract class Types
 
     /**
      * @param string $table Table name
+     * @return Types
      */
     public function alter(string $table): Types
     {
@@ -38,6 +41,7 @@ abstract class Types
     
     /**
      * Adds a new column to the table
+     * @return Types
      */
     public function add(): Types
     {
@@ -48,6 +52,7 @@ abstract class Types
 
     /**
      * Modify a table column
+     * @return Types
      */
     public function modify(): Types
     {
@@ -58,6 +63,7 @@ abstract class Types
 
     /**
      * @param string $old_column Old table column
+     * @return Types
      */
     public function change(string $old_column): Types
     {
@@ -69,6 +75,7 @@ abstract class Types
     /**
      * @param string $old_table Old table name
      * @param string $new_name New table name
+     * @return Types
      */
     public function rename(string $old_table, string $new_name): Types
     {
@@ -79,6 +86,7 @@ abstract class Types
 
     /**
      * @param string $column Column name
+     * @return Types
      */
     public function drop(string $column): Types
     {
@@ -89,6 +97,7 @@ abstract class Types
 
     /**
      * @param string $foreign_key Foreign key name
+     * @return Types
      */
     public function foreign(string $foreign_key): Types
     {   
@@ -99,6 +108,7 @@ abstract class Types
 
     /**
      * @param string $constraint Constraint name
+     * @return Types
      */
     public function constraint(string $constraint): Types
     {
@@ -109,6 +119,7 @@ abstract class Types
 
     /**
      * @param string $constraint Constraint name
+     * @return Types
      */
     public function addConstraint(string $constraint): Types
     {
@@ -120,6 +131,7 @@ abstract class Types
     /**
      * @param string $references
      * @param string $id
+     * @return Types
      */
     public function references(string $references, string $id): Types
     {
@@ -130,17 +142,24 @@ abstract class Types
 
     /**
      * @param string $default
+     * @return Types
      */
     public function default(string $default): Types
     {
         $this->sql = rtrim($this->sql, ",");
-        $this->sql .= " DEFAULT '$default',";
+        
+        if ($default == 'CURRENT_TIMESTAMP' || $default == 'current_timestamp') {
+            $default = strtoupper($default);    
+            $this->sql .= " DEFAULT $default,";
+        } else {
+            $this->sql .= " DEFAULT '$default',";
+        }
 
         return $this;
     }
 
     /**
-     * 
+     * @return Types
      */
     public function unique(): Types
     {
@@ -150,6 +169,9 @@ abstract class Types
         return $this;
     }
 
+    /**
+     * @return Types
+     */
     public function unsigned(): Types
     {
         $this->sql = rtrim($this->sql, ",");
@@ -160,6 +182,7 @@ abstract class Types
 
     /**
      * @param string $column
+     * @return Types
      */
     public function after(string $column): Types
     {
@@ -174,6 +197,9 @@ abstract class Types
         return $this;
     }
 
+    /**
+     * @return Types
+     */
     public function first(): Types
     {
         $comma = substr($this->sql, -1);
@@ -187,6 +213,9 @@ abstract class Types
         return $this;
     }
 
+    /**
+     * @return Types
+     */
     public function increment(): Types
     {
         $this->sql = rtrim($this->sql, ",");
@@ -197,6 +226,7 @@ abstract class Types
 
     /**
      * @param string $field
+     * @return Types
      */
     public function boolean(string $field): Types
     {
@@ -209,6 +239,7 @@ abstract class Types
      * @param string $field
      * @param int $value1
      * @param int $value2
+     * @return Types
      */
     public function decimal(string $field, int $value1, int $value2): Types
     {
@@ -220,6 +251,7 @@ abstract class Types
     /**
      * @param string $field
      * @param int $size
+     * @return Types
      */
     public function char(string $field, int $size): Types
     {
@@ -231,6 +263,7 @@ abstract class Types
     /**
      * @param string $field
      * @param string $size
+     * @return Types
      */
     public function varchar(string $field, int $size): Types
     {
@@ -241,6 +274,7 @@ abstract class Types
 
     /**
      * @param string $field
+     * @return Types
      */
     public function tinytext(string $field): Types
     {
@@ -251,6 +285,7 @@ abstract class Types
 
     /**
      * @param string $field
+     * @return Types
      */
     public function mediumtext(string $field): Types
     {
@@ -261,6 +296,7 @@ abstract class Types
 
     /**
      * @param string $field
+     * @return Types
      */
     public function longtext(string $field): Types
     {
@@ -271,6 +307,7 @@ abstract class Types
     
     /**
      * @param string $field
+     * @return Types
      */
     public function text(string $field): Types
     {
@@ -282,6 +319,7 @@ abstract class Types
     /**
      * @param string $field
      * @param int $size
+     * @return Types
      */
     public function tinyint(string $field, int $size): Types
     {
@@ -293,6 +331,7 @@ abstract class Types
     /**
      * @param string $field
      * @param int $size
+     * @return Types
      */
     public function smallint(string $field, int $size): Types
     {
@@ -304,6 +343,7 @@ abstract class Types
     /**
      * @param string $field
      * @param int $size
+     * @return Types
      */
     public function mediumint(string $field, int $size): Types
     {
@@ -315,6 +355,7 @@ abstract class Types
     /**
      * @param string $field
      * @param int $size
+     * @return Types
      */
     public function bigint(string $field, int $size): Types
     {
@@ -326,6 +367,7 @@ abstract class Types
     /**
      * @param string $field
      * @param int $size = 11
+     * @return Types
      */
     public function int(string $field, int $size = 11): Types
     {
@@ -336,6 +378,7 @@ abstract class Types
 
     /**
      * @param string $field
+     * @return Types
      */
     public function date(string $field): Types
     {
@@ -346,6 +389,7 @@ abstract class Types
 
     /**
      * @param string $field
+     * @return Types
      */
     public function year(string $field): Types
     {
@@ -356,6 +400,7 @@ abstract class Types
 
     /**
      * @param string $field
+     * @return Types
      */
     public function time(string $field): Types
     {
@@ -366,6 +411,7 @@ abstract class Types
 
     /**
      * @param string $field
+     * @return Types
      */
     public function datetime(string $field): Types
     {
@@ -376,10 +422,11 @@ abstract class Types
 
     /**
      * @param string $field
+     * @return Types
      */
     public function timestamp(string $field): Types
     {
-        $this->sql .= "`$field` TIMESTAMP DEFAULT CURRENT_TIMESTAMP(),";
+        $this->sql .= "`$field` TIMESTAMP,";
         
         return $this;
     }

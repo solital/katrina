@@ -16,18 +16,22 @@ abstract class DB
      */
     public static function getInstance(): object
     {
-        try {
-            self::$pdo = new \PDO(DB_CONFIG['DRIVE'].":host=".DB_CONFIG['HOST'].
-            ";dbname=".DB_CONFIG['DBNAME'].";charset=utf8", DB_CONFIG['USER'], DB_CONFIG['PASS'], 
-            [PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8mb4"]);
-
-            self::$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            self::$pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, TRUE);
-            return self::$pdo; 
-        } catch (\PDOException $e) {
-            Exception::alertMessage($e, "Database connection error");
-            die();
+        if (!isset(self::$pdo)) {
+            try {
+                self::$pdo = new \PDO(DB_CONFIG['DRIVE'].":host=".DB_CONFIG['HOST'].
+                ";dbname=".DB_CONFIG['DBNAME'].";charset=utf8", DB_CONFIG['USER'], DB_CONFIG['PASS'], 
+                [PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8mb4"]);
+    
+                self::$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+                self::$pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, TRUE);
+                return self::$pdo; 
+            } catch (\PDOException $e) {
+                Exception::alertMessage($e, "Database connection error");
+                die();
+            }
         }
+
+        return self::$pdo;
     }
 
     /**
@@ -46,5 +50,14 @@ abstract class DB
     public static function query($sql): object
     {
         return self::getInstance()->query($sql);
+    }
+
+    /**
+     * PDO last insert id command
+     * @param DB $sql
+     */
+    public static function lastInsertId()
+    {
+        return self::getInstance()->lastInsertId();
     }
 }
