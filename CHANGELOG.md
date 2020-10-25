@@ -1,6 +1,13 @@
 # Released Notes
 
-## v1.1.0 - (2020-07-27)
+## v1.1.1 - (2020-10-25)
+
+### Fixed
+
+- Fixed `NOW()`, `NULL` and `CURRENT_TIMESTAMP()` in `insert` and `update` methods
+------------------------------------------------------------------------
+
+## v1.1.0 - (2020-07-31)
 
 ### Added
 

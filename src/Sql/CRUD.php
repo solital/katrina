@@ -98,6 +98,8 @@ abstract class CRUD extends Custom
             $this->sql = str_replace("'NOW()'", "NOW()", $this->sql);
         } elseif (strpos($values, "CURRENT_TIMESTAMP()") !== false) {
             $this->sql = str_replace("'CURRENT_TIMESTAMP()'", "CURRENT_TIMESTAMP()", $this->sql);
+        } elseif (stripos($values, "NULL") !== false) {
+            $this->sql = str_replace("'NULL'", "NULL", $this->sql);
         }
 
         try {
@@ -148,6 +150,14 @@ abstract class CRUD extends Custom
                 $this->sql .= " WHERE $this->columnPrimaryKey = $where;";
             } elseif (is_string($where)) {
                 $this->sql .= " WHERE $where;";
+            }
+
+            if (strpos($this->sql, "NOW()") !== false) {
+                $this->sql = str_replace("'NOW()'", "NOW()", $this->sql);
+            } elseif (strpos($this->sql, "CURRENT_TIMESTAMP()") !== false) {
+                $this->sql = str_replace("'CURRENT_TIMESTAMP()'", "CURRENT_TIMESTAMP()", $this->sql);
+            } elseif (stripos($this->sql, "NULL") !== false) {
+                $this->sql = str_replace("'NULL'", "NULL", $this->sql);
             }
             
             $stmt = DB::prepare($this->sql);
