@@ -9,7 +9,7 @@
         {"name": "Brenno Duarte de Lima", "email": "brenno.gnr@gmail.com"}
     ],
     "require": {
-        "php": "^7.2",
+        "php": "^7.2|^8.0",
         "ext-pdo": "*"
     },
     "autoload": {
