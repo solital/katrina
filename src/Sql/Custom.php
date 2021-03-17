@@ -9,8 +9,9 @@ use PDO;
 abstract class Custom extends Pagination
 {
     /**
-     * Create custom SELECT command statement returning all data
-     * @param string $query custom select command
+     * @param string $query
+     * 
+     * @return array|null
      */
     public function customQueryAll(string $query): ?array
     {
@@ -26,10 +27,11 @@ abstract class Custom extends Pagination
     }
 
     /**
-     * Create custom SELECT command statement returning a single data
-     * @param string $query custom select command
+     * @param string $query
+     * 
+     * @return array
      */
-    public function customQueryOnly(string $query)
+    public function customQueryOnly(string $query): ?array
     {
         try {
             $stmt = DB::query($query);

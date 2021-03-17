@@ -1,6 +1,7 @@
 <?php
 
 namespace Katrina\Sql;
+
 use Katrina\Connection\DB as DB;
 use Katrina\Sql\Custom as Custom;
 use Katrina\Exception\Exception;
@@ -13,13 +14,14 @@ abstract class CRUD extends Custom
     protected $sql;
 
     /**
-     * Checks email and password in the database
-     * @param string $column_email database email column
-     * @param string $column_pass database password column
-     * @param string $email email to be verified
-     * @param string $password password to be verified
+     * @param string $column_email
+     * @param string $column_pass
+     * @param string $email
+     * @param string $password
+     * 
+     * @return array
      */
-    public function verifyLogin(string $column_email, string $column_pass, string $email, string $password)
+    public function verifyLogin(string $column_email, string $column_pass, string $email, string $password): array
     {
         try {
             $this->sql = "SELECT * FROM $this->table WHERE $column_email = '$email';";
@@ -28,7 +30,7 @@ abstract class CRUD extends Custom
             if (password_verify($password, $res[$column_pass])) {
                 return $res;
             } else {
-                return false;
+                return null;
             }
         } catch (\PDOException $e) {
             Exception::alertMessage($e, "'verifyLogin()' error");
@@ -36,10 +38,10 @@ abstract class CRUD extends Custom
     }
 
     /**
-     * SQL SELECT command
-     * @param int    $primaryKey Optional. Primary key of the table
-     * @param string $where Optional. SQL WHERE command
-     * @param string $columns Name of columns to be returned. "*" by default
+     * @param int|null $primaryKey
+     * @param string|null $where
+     * @param string $columns
+     * 
      * @return CRUD
      */
     public function select(int $primaryKey = null, string $where = null, string $columns = "*"): CRUD
@@ -62,11 +64,12 @@ abstract class CRUD extends Custom
     }
 
     /**
-     * SQL INNER JOIN command
-     * @param string $tableForeign Column name with foreign key
-     * @param array  $columnForeignKey Column name with the primary key and column where the foreign key is
-     * @param int    $where Optional. WHERE clause
-     * @param string $columns Name of columns to be returned. "*" by default
+     * @param string $tableForeign
+     * @param array $columnForeignKey
+     * @param string|null $where
+     * @param string $columns
+     * 
+     * @return CRUD
      */
     public function innerJoin(string $tableForeign, array $columnForeignKey, string $where = null, string $columns = "*"): CRUD
     {
@@ -81,10 +84,11 @@ abstract class CRUD extends Custom
         return $this;
     }
 
-     /**
-     * SQL INSERT command
-     * @param array $values The data that will be inserted in the table
-     * @param bool $lastId  Lat insert id. Default is "false"
+    /**
+     * @param array $values
+     * @param bool $lastId
+     * 
+     * @return mixed
      */
     public function insert(array $values = [], bool $lastId = false)
     {
@@ -92,7 +96,7 @@ abstract class CRUD extends Custom
         $resColumns = implode(",", $this->columns);
         $values = implode("','", $values);
 
-        $this->sql = "INSERT INTO ".$this->table." (".($resColumns).") VALUES ( '".$values."' )";
+        $this->sql = "INSERT INTO " . $this->table . " (" . ($resColumns) . ") VALUES ( '" . $values . "' )";
 
         if (strpos($values, "NOW()") !== false) {
             $this->sql = str_replace("'NOW()'", "NOW()", $this->sql);
@@ -104,20 +108,20 @@ abstract class CRUD extends Custom
 
         try {
             $stmt = DB::prepare($this->sql);
-            for ($i=0; $i < $countColumns; $i++) { 
-                $stmt->bindValue(':'.$this->columns[$i], $values[$i]);
+            for ($i = 0; $i < $countColumns; $i++) {
+                $stmt->bindValue(':' . $this->columns[$i], $values[$i]);
             }
             $res = $stmt->execute();
-            
+
             if ($lastId == true) {
                 $lastId = DB::lastInsertId();
-            
+
                 return [
                     'res' => $res,
                     'lastId' => $lastId
                 ];
             }
-            
+
             return $res;
         } catch (\PDOException $e) {
             Exception::alertMessage($e, "'insert()' error");
@@ -125,19 +129,24 @@ abstract class CRUD extends Custom
     }
 
     /**
-     * SQL UPDATE command
-     * @param array $columns The columns that will be updated
-     * @param array $values The data that will be updated in the table
-     * @param mixed $where WHERE clause
+     * @param array $columns
+     * @param array $values
+     * @param mixed $where
+     * @param bool $intNumbers
+     * 
      * @return bool
      */
-    public function update(array $columns, array $values, $where): bool
+    public function update(array $columns, array $values, $where, bool $intNumbers = false): bool
     {
         try {
             $this->sql = "UPDATE $this->table SET ";
 
-            for ($i=0; $i < \count($columns); $i++) {
-                $this->sql .= "$columns[$i] = '$values[$i]',";
+            for ($i = 0; $i < \count($columns); $i++) {
+                if ($intNumbers == true) {
+                    $this->sql .= "$columns[$i] = $values[$i],";
+                } else {
+                    $this->sql .= "$columns[$i] = '$values[$i]',";
+                }
             }
 
             $this->sql = rtrim($this->sql, ", ");
@@ -159,13 +168,13 @@ abstract class CRUD extends Custom
             } elseif (stripos($this->sql, "NULL") !== false) {
                 $this->sql = str_replace("'NULL'", "NULL", $this->sql);
             }
-            
+
             $stmt = DB::prepare($this->sql);
-            for ($i=0; $i < \count($columns); $i++) { 
-                $stmt->bindParam(':'.$columns[$i], $values[$i]);
+            for ($i = 0; $i < \count($columns); $i++) {
+                $stmt->bindParam(':' . $columns[$i], $values[$i]);
             }
             $res = $stmt->execute();
-            
+
             return $res;
         } catch (\PDOException $e) {
             Exception::alertMessage($e, "'update()' error");
@@ -173,9 +182,10 @@ abstract class CRUD extends Custom
     }
 
     /**
-     * SQL DELETE command
-     * @param mixed  $value Primary key of the table
-     * @param string $column Column name
+     * @param mixed $value
+     * @param string $column
+     * @param bool $check_foreign_key
+     * 
      * @return CRUD
      */
     public function delete($value, string $column = NULL, bool $check_foreign_key = false): CRUD
@@ -187,35 +197,36 @@ abstract class CRUD extends Custom
         }
 
         if (is_string($value)) {
-            $this->sql = 'DELETE FROM '.$this->table.' WHERE '.$this->columnPrimaryKey.' = "'.$value.'";';
+            $this->sql = 'DELETE FROM ' . $this->table . ' WHERE ' . $this->columnPrimaryKey . ' = "' . $value . '";';
 
             if ($column != NULL) {
-                $this->sql = 'DELETE FROM '.$this->table.' WHERE '.$column.' = "'.$value.'";';
+                $this->sql = 'DELETE FROM ' . $this->table . ' WHERE ' . $column . ' = "' . $value . '";';
             }
         }
 
         if ($check_foreign_key == true) {
-            $this->sql = "SET FOREIGN_KEY_CHECKS=0;".$this->sql."SET FOREIGN_KEY_CHECKS=1;";
+            $this->sql = "SET FOREIGN_KEY_CHECKS=0;" . $this->sql . "SET FOREIGN_KEY_CHECKS=1;";
         }
 
         return $this;
     }
 
     /**
-     * Call a database procedure
-     * @param string $procedure Procedure name
-     * @param array  $params Procedure params. Null by default
+     * @param string $procedure
+     * @param array|null $params
+     * 
      * @return CRUD
      */
     public function call(string $procedure, array $params = null): CRUD
     {
         $values = null;
+
         if ($params) {
             $values = implode(", ", $params);
         }
 
         $this->sql = "CALL $procedure($values)";
-        
+
         return $this;
     }
 }

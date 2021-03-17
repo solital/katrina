@@ -1,6 +1,7 @@
 <?php
 
 namespace Katrina\Sql;
+
 use Katrina\Connection\DB as DB;
 use Katrina\Exception\Exception;
 use PDO;
@@ -8,18 +9,19 @@ use PDO;
 abstract class Create extends Types
 {   
     /**
-     * Compiles the SQL code
-     * @param string $fetch "ONLY" for one result; "ALL" for all results
+     * @param string $fetch
+     * 
+     * @return mixed
      */
     public function build(string $fetch = "")
     {
         $fetch = strtoupper($fetch);
-        
+
         try {
             $this->sql = rtrim($this->sql, ",");
             $stmt = DB::prepare($this->sql);
             $res = $stmt->execute();
-            
+
             if ($fetch == "ONLY") {
                 $res = $stmt->fetch(PDO::FETCH_ASSOC);
             } else if ($fetch == "ALL") {
@@ -33,7 +35,6 @@ abstract class Create extends Types
     }
 
     /**
-     * Closes the table after it is created
      * @return Create
      */
     public function closeTable(): Create
@@ -45,8 +46,8 @@ abstract class Create extends Types
     }
 
     /**
-     * Starts creating a new table
-     * @param string $table table name
+     * @param string $table
+     * 
      * @return Create
      */
     public function createTable(string $table): Create
@@ -57,7 +58,6 @@ abstract class Create extends Types
     }
 
     /**
-     * List all tables
      * @return Create
      */
     public function listTables(): Create
@@ -68,32 +68,32 @@ abstract class Create extends Types
     }
 
     /**
-     * Describe a table
-     * @param string $table table name
+     * @param string $table
+     * 
      * @return Create
      */
     public function describeTable(string $table): Create
     {
-        $this->sql = "DESCRIBE ".$table;
+        $this->sql = "DESCRIBE " . $table;
 
         return $this;
     }
 
     /**
-     * Drop a table
-     * @param string $table table name
+     * @param string $table
+     * 
      * @return Create
      */
     public function dropTable(string $table): Create
     {
-        $this->sql = "DROP TABLE IF EXISTS ".$table;
+        $this->sql = "DROP TABLE IF EXISTS " . $table;
 
         return $this;
     }
 
     /**
-     * Truncate a table
-     * @param string $table table name
+     * @param bool $check_foreign_key
+     * 
      * @return Create
      */
     public function truncate(bool $check_foreign_key = false): Create
@@ -106,15 +106,5 @@ abstract class Create extends Types
         }
 
         return $this;
-    }
-
-    /**
-     * Dump a database
-     * @param string $database database name
-     * @param string $dump_dir dump directory
-     */
-    public function dump(string $database, string $dump_dir)
-    {
-        \exec("mysqldump -u ".DB_CONFIG['USER']." -p".DB_CONFIG['PASS']." $database --routines > $dump_dir;");
     }
 }

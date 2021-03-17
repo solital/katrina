@@ -9,13 +9,13 @@ use PDO;
 abstract class Pagination extends Create
 {
     /**
-     * Create a paging system
-     * @param string $table         Table name
-     * @param int    $limit         Insert a limit
-     * @param array  $innerjoin     Inner join
-     * @param string $where         WHERE clause 
-     * @param string $previous_name Arrow that will be displayed to return a value
-     * @param string $next_name     Arrow that will be displayed to advance a value
+     * @param string $table
+     * @param int $limit
+     * @param array|null $innerjoin
+     * @param string|null $where
+     * @param string $previous_name
+     * @param string $next_name
+     * 
      * @return array
      */
     public function pagination(string $table, int $limit, array $innerjoin = null, string $where = null, string $previous_name = "<<", string $next_name = ">>"): array
@@ -94,11 +94,11 @@ abstract class Pagination extends Create
     }
 
     /**
-     * Create a custom paging system
-     * @param string $query         SELECT command
-     * @param int    $limit         Insert a limit
-     * @param string $previous_name Arrow that will be displayed to return a value
-     * @param string $next_name     Arrow that will be displayed to advance a value
+     * @param string $query
+     * @param int $limit
+     * @param string $previous_name
+     * @param string $next_name
+     * 
      * @return array
      */
     public function customPagination(string $query, int $limit, string $previous_name = "<<", string $next_name = ">>"): array

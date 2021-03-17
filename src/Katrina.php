@@ -23,12 +23,12 @@ class Katrina extends CRUD
     /**
      * @var const
      */
-    public const KATRINA_VERSION = "1.0.0";
+    public const KATRINA_VERSION = "1.2.0";
 
     /**
      * @param string $table
      * @param string $columnPrimaryKey
-     * @param array $columns = null
+     * @param array|null $columns
      */
     public function __construct(string $table, string $columnPrimaryKey, array $columns = null)
     {

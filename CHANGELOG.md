@@ -1,5 +1,21 @@
 # Released Notes
 
+## v1.2.0 - (2021-03-XX)
+
+### Added
+
+- Added support for databases: SQLITE, POSTGRESQL and ORACLE
+
+### Fixed
+
+- Fixed annotations
+- Fixed return type
+
+### Removed
+
+- Remove `dump` command
+------------------------------------------------------------------------
+
 ## v1.1.2 - (2021-01-24)
 
 ### Fixed
