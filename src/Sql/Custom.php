@@ -13,7 +13,7 @@ abstract class Custom extends Pagination
      * 
      * @return array|null
      */
-    public function customQueryAll(string $query): ?array
+    public function customQueryAll(string $query)
     {
         try {
             $stmt = DB::query($query);
@@ -31,7 +31,7 @@ abstract class Custom extends Pagination
      * 
      * @return array
      */
-    public function customQueryOnly(string $query): ?array
+    public function customQueryOnly(string $query)
     {
         try {
             $stmt = DB::query($query);
