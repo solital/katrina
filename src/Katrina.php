@@ -1,6 +1,7 @@
 <?php
 
 namespace Katrina;
+
 use Katrina\Sql\CRUD as CRUD;
 
 class Katrina extends CRUD
@@ -8,22 +9,22 @@ class Katrina extends CRUD
     /**
      * @var string
      */
-    protected $table;
+    protected string $table;
 
     /**
      * @var string
      */
-    protected $columnPrimaryKey;
+    protected string $columnPrimaryKey;
 
     /**
      * @var array
      */
-    protected $columns;
-    
+    protected ?array $columns;
+
     /**
      * @var const
      */
-    public const KATRINA_VERSION = "1.2.1";
+    public const KATRINA_VERSION = "1.3.0";
 
     /**
      * @param string $table

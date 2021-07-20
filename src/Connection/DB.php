@@ -2,7 +2,6 @@
 
 namespace Katrina\Connection;
 
-use Katrina\Exception\Exception as Exception;
 use PDO;
 
 abstract class DB
@@ -40,13 +39,13 @@ abstract class DB
         $extension = DB_CONFIG['DRIVE'];
 
         if ($extension == "mysql" && !extension_loaded('pdo_mysql')) {
-            Exception::extensionNotFound($extension);
+            throw new \PDOException("Extension $extension not installed or not enabled");
         } elseif ($extension == "sqlite" && !extension_loaded('pdo_sqlite')) {
-            Exception::extensionNotFound($extension);
+            throw new \PDOException("Extension $extension not installed or not enabled");
         } elseif ($extension == "pgsql" && !extension_loaded('pdo_pgsql')) {
-            Exception::extensionNotFound($extension);
+            throw new \PDOException("Extension $extension not installed or not enabled");
         } elseif ($extension == "oci" && !extension_loaded('pdo_oci')) {
-            Exception::extensionNotFound($extension);
+            throw new \PDOException("Extension $extension not installed or not enabled");
         }
 
         return __CLASS__;
@@ -107,7 +106,7 @@ abstract class DB
                 self::$pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, TRUE);
                 return self::$pdo;
             } catch (\PDOException $e) {
-                Exception::alertMessage($e, "Database connection error");
+                throw new \PDOException("Database connection error: " . $e->getMessage());
                 die();
             }
         }

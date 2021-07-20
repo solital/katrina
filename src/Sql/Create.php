@@ -2,12 +2,14 @@
 
 namespace Katrina\Sql;
 
-use Katrina\Connection\DB as DB;
-use Katrina\Exception\Exception;
 use PDO;
+use Katrina\Sql\TypesTrait;
+use Katrina\Connection\DB as DB;
 
-abstract class Create extends Types
-{   
+abstract class Create
+{
+    use TypesTrait;
+
     /**
      * @param string $fetch
      * 
@@ -30,7 +32,7 @@ abstract class Create extends Types
 
             return $res;
         } catch (\PDOException $e) {
-            Exception::alertMessage($e, "'build()' error");
+            throw new \PDOException("Error in 'build()': " . $e->getMessage());
         }
     }
 

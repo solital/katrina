@@ -4,14 +4,13 @@ namespace Katrina\Sql;
 
 use Katrina\Connection\DB as DB;
 use Katrina\Sql\Custom as Custom;
-use Katrina\Exception\Exception;
 
 abstract class CRUD extends Custom
 {
     /**
-     * @var mixed
+     * @var string
      */
-    protected $sql;
+    protected string $sql;
 
     /**
      * @param string $column_email
@@ -33,7 +32,7 @@ abstract class CRUD extends Custom
                 return null;
             }
         } catch (\PDOException $e) {
-            Exception::alertMessage($e, "'verifyLogin()' error");
+            throw new \PDOException("Error in 'verifyLogin()': " . $e->getMessage());
         }
     }
 
@@ -124,7 +123,7 @@ abstract class CRUD extends Custom
 
             return $res;
         } catch (\PDOException $e) {
-            Exception::alertMessage($e, "'insert()' error");
+            throw new \PDOException("Error in 'insert()': " . $e->getMessage());
         }
     }
 
@@ -177,7 +176,7 @@ abstract class CRUD extends Custom
 
             return $res;
         } catch (\PDOException $e) {
-            Exception::alertMessage($e, "'update()' error");
+            throw new \PDOException("Error in 'update()': " . $e->getMessage());
         }
     }
 

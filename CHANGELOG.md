@@ -1,5 +1,21 @@
 # Released Notes
  
+## v1.3.0 - (2021-07-20)
+
+### Added
+
+- Added support for `LIMIT`, `ORDER BY`, `LIKE` and `BETWEEN`
+- Added tests
+
+### Change
+
+- Changed class `Types` to trait `TypesTrait`
+
+### Removed
+
+- Removed exception template
+------------------------------------------------------------------------
+
 ## v1.2.1 - (2021-06-22)
 
 ### Fixed

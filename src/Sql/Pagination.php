@@ -1,9 +1,9 @@
 <?php
 
 namespace Katrina\Sql;
+
 use Katrina\Sql\Create;
 use Katrina\Connection\DB as DB;
-use Katrina\Exception\Exception;
 use PDO;
 
 abstract class Pagination extends Create
@@ -22,7 +22,7 @@ abstract class Pagination extends Create
     {
 
         if ($limit == 0 || $limit <= 0) {
-            Exception::alertMessage(null, "'pagination()' error - Division by zero");
+            throw new \PDOException("Error in 'pagination() - Division by zero'");
             die;
         }
 
@@ -33,7 +33,7 @@ abstract class Pagination extends Create
             $sql = "SELECT * FROM $table";
 
             if ($innerjoin != null) {
-                $sql = "SELECT * FROM $table a INNER JOIN ". $innerjoin[0] ." b ON a.". $innerjoin[1] ."=b.".$innerjoin[2];
+                $sql = "SELECT * FROM $table a INNER JOIN " . $innerjoin[0] . " b ON a." . $innerjoin[1] . "=b." . $innerjoin[2];
             }
 
             if ($where != null) {
@@ -41,42 +41,42 @@ abstract class Pagination extends Create
             } else {
                 $sql .= " LIMIT $start, $limit";
             }
-            
+
             $stmt = DB::query($sql);
             $stmt->execute();
             $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
             $sql = "SELECT * FROM $table";
             if (isset($innerjoin)) {
-                $sql = "SELECT * FROM $table a INNER JOIN ". $innerjoin[0] ." b ON a.". $innerjoin[1] ."=b.".$innerjoin[2].";";
+                $sql = "SELECT * FROM $table a INNER JOIN " . $innerjoin[0] . " b ON a." . $innerjoin[1] . "=b." . $innerjoin[2] . ";";
             }
             $stmt = DB::query($sql);
             $stmt->execute();
             $count = $stmt->rowCount();
 
-            $qtdPag = ceil($count/$limit);
+            $qtdPag = ceil($count / $limit);
 
             $html = "<a href='?page=1' class='pagination_first_item'>$previous_name</a> ";
 
-            if($qtdPag > 1 && $pg<= $qtdPag){
-                for($i=1; $i <= $qtdPag; $i++){
-                    if($i == $pg){
-                        $html .= " <span class='pagination_atual_item'>".$i."</span> ";
+            if ($qtdPag > 1 && $pg <= $qtdPag) {
+                for ($i = 1; $i <= $qtdPag; $i++) {
+                    if ($i == $pg) {
+                        $html .= " <span class='pagination_atual_item'>" . $i . "</span> ";
                     } else {
-                        $html .= " <a href='?page=$i' class='pagination_others_itens'>".$i."</a> ";
+                        $html .= " <a href='?page=$i' class='pagination_others_itens'>" . $i . "</a> ";
                     }
                 }
             }
 
             $html .= " <a href=\"?page=$qtdPag\" class='pagination_last_item'>$next_name</a>";
-            
+
             if ($rows == NULL || empty($rows)) {
                 return [
                     "rows" => '',
                     "arrows" => ''
                 ];
             }
-            
+
             if ($qtdPag == 1) {
                 return [
                     "rows" => $rows,
@@ -85,11 +85,11 @@ abstract class Pagination extends Create
             }
 
             return [
-                "rows" => $rows, 
+                "rows" => $rows,
                 "arrows" => $html
             ];
         } catch (\PDOException $e) {
-            Exception::alertMessage($e, "'pagination()' error");
+            throw new \PDOException("Error in 'pagination()': " . $e->getMessage());
         }
     }
 
@@ -105,7 +105,7 @@ abstract class Pagination extends Create
     {
 
         if ($limit == 0 || $limit <= 0) {
-            Exception::alertMessage(null, "'customPagination()' error - Division by zero");
+            throw new \PDOException("Error in 'pagination() - Division by zero'");
             die;
         }
 
@@ -113,7 +113,7 @@ abstract class Pagination extends Create
         $start = ($pg * $limit) - $limit;
 
         try {
-            $sql = $query." LIMIT $start, $limit";
+            $sql = $query . " LIMIT $start, $limit";
             $stmt = DB::query($sql);
             $stmt->execute();
             $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -123,29 +123,29 @@ abstract class Pagination extends Create
             $stmt->execute();
             $count = $stmt->rowCount();
 
-            $qtdPag = ceil($count/$limit);
+            $qtdPag = ceil($count / $limit);
 
             $html = "<a href='?page=1' class='pagination_first_item'>$previous_name</a> ";
 
-            if($qtdPag > 1 && $pg<= $qtdPag){
-                for($i=1; $i <= $qtdPag; $i++){
-                    if($i == $pg){
-                        $html .= " <span class='pagination_atual_item'>".$i."</span> ";
+            if ($qtdPag > 1 && $pg <= $qtdPag) {
+                for ($i = 1; $i <= $qtdPag; $i++) {
+                    if ($i == $pg) {
+                        $html .= " <span class='pagination_atual_item'>" . $i . "</span> ";
                     } else {
-                        $html .= " <a href='?page=$i' class='pagination_others_itens'>".$i."</a> ";
+                        $html .= " <a href='?page=$i' class='pagination_others_itens'>" . $i . "</a> ";
                     }
                 }
             }
 
             $html .= " <a href=\"?page=$qtdPag\" class='pagination_last_item'>$next_name</a>";
-            
+
             if ($rows == NULL || empty($rows)) {
                 return [
                     "rows" => '',
                     "arrows" => ''
                 ];
             }
-            
+
             if ($qtdPag == 1) {
                 return [
                     "rows" => $rows,
@@ -154,11 +154,11 @@ abstract class Pagination extends Create
             }
 
             return [
-                "rows" => $rows, 
+                "rows" => $rows,
                 "arrows" => $html
             ];
         } catch (\PDOException $e) {
-            Exception::alertMessage($e, "'customPagination()' error");
+            throw new \PDOException("Error in 'customPagination()': " . $e->getMessage());
         }
     }
 }
