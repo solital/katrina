@@ -1,80 +1,30 @@
 # Released Notes
- 
-## v1.3.0 - (2021-07-20)
+
+## v2.0.0 - (2022-04-xx)
 
 ### Added
 
-- Added support for `LIMIT`, `ORDER BY`, `LIKE` and `BETWEEN`
-- Added tests
+- Added `WHERE` and `GROUP BY` method
+- Added inner join on multiple tables
+- Added typing in variables
+- Added `customQuery` method
+- Added return in array and object in `build` method
+- Added new tests
+- Added function support
+- Added columns `created_at` and `update_at` by default
+- Added methods `onDelete` and `onUpdate`
 
 ### Change
 
-- Changed class `Types` to trait `TypesTrait`
+- Changed methods in `Connection` class
+- Changed `Pagination` class to `PaginationTrait` trait
+- Changed ORM structure
+- Changed `update` method
+- Changed `Build` to `KatrinaStatement`
 
 ### Removed
 
-- Removed exception template
+- Removed `Custom` and `TypesTrait`
+- Removed `customQueryOnly` and `CustomQueryAll` methods
+- Removed `addConstraint` and `change` method in DDLTrait
 ------------------------------------------------------------------------
-
-## v1.2.1 - (2021-06-22)
-
-### Fixed
-
-- Fixed return type
-------------------------------------------------------------------------
-
-## v1.2.0 - (2021-03-17)
-
-### Added
-
-- Added support for databases: SQLITE, POSTGRESQL and ORACLE
-
-### Fixed
-
-- Fixed annotations
-- Fixed return type
-
-### Removed
-
-- Remove `dump` command
-------------------------------------------------------------------------
-
-## v1.1.2 - (2021-01-24)
-
-### Fixed
-
-- Fixed PHP 8 in Composer
-------------------------------------------------------------------------
-
-## v1.1.1 - (2020-10-25)
-
-### Fixed
-
-- Fixed `NOW()`, `NULL` and `CURRENT_TIMESTAMP()` in `insert` and `update` methods
-------------------------------------------------------------------------
-
-## v1.1.0 - (2020-07-31)
-
-### Added
-
-- Added `customPagination` class
-- Added new checks to the `insert`,` update` and `delete` methods
-
-### Fixed
-
-- Fixed bugs in the `CRUD` class
-- Fixed connection to the database
-- Fixed PSR-19
-------------------------------------------------------------------------
-## v1.0.0 - (2020-07-17)
-
-### Changed
-
-- Changed Katrina ORM to version 1.0.0
-
-## v1.0.0-beta - (2020-07-15)
-
-### Fixed
-
-- Fixed comments and PSR-12
-- Fixed `implode` bug in the` insert` method

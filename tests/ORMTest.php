@@ -2,38 +2,55 @@
 
 namespace KatrinaTest;
 
+use Katrina\Functions\Functions;
+use Katrina\Connection\Connection;
 use Katrina\Katrina;
 
-class ORMTest
+class ORMTest extends Katrina
 {
-    public function instance()
+    protected ?string $table = "table_test";
+    protected ?string $id = "id_orm";
+    protected bool $timestamp = false;
+
+    public function create()
     {
-        $katrina = new Katrina("usuarios", "idUsu", ["nome", "idade"]);
-        return $katrina;
+        $res = self::createTable("table_test")
+            ->int('id_orm')->primary()->increment()
+            ->varchar("name", 20)->notNull()
+            ->varchar("email", 100)->notNull()
+            #->constraint("dev_cons_fk")->foreign("id_usu")->references("usuarios", "idUsu")->onDelete('cascade')
+            #->createdUpdateAt()
+            ->closeTable();
+
+        return $res;
     }
 
-    public function list()
+    public function listAllTables()
     {
-        return $this->instance()->select()->build("ALL");
+        return self::listTables();
     }
 
-    public function limit(int $first, int $second)
+    public function describe()
     {
-        return $this->instance()->select()->limit($first, $second)->build("ALL");
+        return self::describeTable('usuarios');
     }
 
-    public function like(string $like)
+    public function transaction()
     {
-        return $this->instance()->select(null, "nome")->like($like)->build("ALL");
-    }
+        try {
+            $pdo = Connection::getInstance();
+            $pdo->beginTransaction();
 
-    public function order(string $order, bool $grow)
-    {
-        return $this->instance()->select()->order($order, $grow)->build("ALL");
-    }
+            // code...
 
-    public function between($column, $first, $second)
-    {
-        return $this->instance()->select(null, $column)->between($first, $second)->build("ALL");
+            $pdo->commit();
+
+            return true;
+        } catch (\PDOException $e) {
+            $pdo->rollback();
+            #echo $e->getMessage();
+
+            return false;
+        }
     }
 }

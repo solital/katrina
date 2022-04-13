@@ -3,3 +3,4 @@ vendor/
 tests/tmp/*
 /nbproject/
 index.php
+.phpunit.result.cache

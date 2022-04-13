@@ -1,5 +1,6 @@
 <?php
 
+# MYSQL
 define('DB_CONFIG', [
     'DRIVE' => 'mysql',
     'HOST' => 'localhost',
@@ -7,3 +8,12 @@ define('DB_CONFIG', [
     'USER' => 'root',
     'PASS' => ''
 ]);
+
+# POSTGRES
+/* define('DB_CONFIG', [
+    'DRIVE' => 'pgsql',
+    'HOST' => 'localhost',
+    'DBNAME' => 'teste',
+    'USER' => 'postgres',
+    'PASS' => '123'
+]); */
