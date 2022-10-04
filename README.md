@@ -7,7 +7,7 @@ Official ORM of Solital framework
 
 ## Documentation
 
-You can see all the Katrina ORM documentation [here](http://solitalframework.rf.gd/docs/3.x/katrina2/)
+You can see all the Katrina ORM documentation [here](https://solitalframework.rf.gd/docs/3.x/katrina-orm/)
 
 ## License
 
