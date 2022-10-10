@@ -1,5 +1,18 @@
 # Released Notes
 
+## v2.0.1 - (2022-10-10)
+
+### Fixed
+
+- Fixed exception in `select` method
+- Fixed parameters in `limit` method
+
+### Changed
+
+- Changed return of data in `pagination` method
+
+------------------------------------------------------------------------
+
 ## v2.0.0 - (2022-05-18)
 
 ### Added
