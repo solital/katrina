@@ -12,7 +12,7 @@ trait ExtendQueryTrait
     use DDLTrait;
 
     /**
-     * @var string
+     * @var null|string
      */
     protected ?string $sql;
 
@@ -27,9 +27,9 @@ trait ExtendQueryTrait
     private static string $table_foreign;
 
     /**
-     * @var string
+     * @var null|string
      */
-    private static string $id_foreign;
+    private static ?string $id_foreign;
 
     /**
      * @var array
@@ -87,21 +87,20 @@ trait ExtendQueryTrait
     }
 
     /**
-     * @param int $offset
-     * @param int $row_count
+     * @param int $rows
+     * @param int|null $row_count
      * 
      * @return self
      */
-    public function limit(int $offset, int $row_count): self
+    public function limit(int $rows, ?int $row_count = null): self
     {
-        if (!is_int($offset)) {
-            throw new \IntlException("Offset not INT");
-        } else if (!is_int($row_count)) {
-            throw new \IntlException("Row count not INT");
-        }
-
         self::$static_sql = rtrim(self::$static_sql, ",");
-        self::$static_sql .= " LIMIT $offset, $row_count";
+
+        if ($row_count !== null) {
+            self::$static_sql .= " LIMIT $rows, $row_count";
+        } else {
+            self::$static_sql .= " LIMIT $rows";
+        }
 
         return $this;
     }

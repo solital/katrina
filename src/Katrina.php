@@ -248,11 +248,17 @@ class Katrina
      * @param string $columns
      * 
      * @return self
+     * @throws KatrinaException
      */
     public static function select(int $primary_key = null, string $columns = "*"): self
     {
         $class = get_called_class();
         $instance = new $class();
+
+        if ($instance->table == null || empty($instance->table)) {
+            throw new KatrinaException($class . ': Table name in database not defined');
+        }
+
         self::$table_foreign = $instance->table;
         self::$id_foreign = $instance->id;
 
@@ -346,7 +352,7 @@ class Katrina
         $class = get_called_class();
         $instance = new $class();
         self::$table_foreign = $instance->table;
-        
+
         $sql = "DELETE FROM {$instance->table} WHERE {$where};";
 
         return KatrinaStatement::executePrepare($sql);

@@ -56,7 +56,7 @@ trait PaginationTrait
 
             $stmt = Connection::getInstance()->query($sql);
             $stmt->execute();
-            $this->rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $this->rows = $stmt->fetchAll(PDO::FETCH_OBJ);
 
             $sql = "SELECT * FROM $table";
 
@@ -98,7 +98,7 @@ trait PaginationTrait
             $sql = $query . " LIMIT $start, $limit";
             $stmt = Connection::getInstance()->query($sql);
             $stmt->execute();
-            $this->rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $this->rows = $stmt->fetchAll(PDO::FETCH_OBJ);
 
             $sql = $query;
             $stmt = Connection::getInstance()->query($sql);
