@@ -6,22 +6,32 @@ trait MathFunctionsTrait
 {
     /**
      * @param string $value
+     * @param string $as
      * 
      * @return string
      */
-    public static function abs(string $value): string
+    public static function abs(string $value, string $as = ''): string
     {
-        return "ABS({$value})";
+        if ($as != '') {
+            return "ABS({$value}) AS {$as}";
+        } else {
+            return "ABS({$value})";
+        }
     }
 
     /**
      * @param string $value
+     * @param string $as
      * 
      * @return string
      */
-    public static function sum(string $value): string
+    public static function sum(string $value, string $as = ''): string
     {
-        return "SUM({$value})";
+        if ($as != '') {
+            return "SUM({$value}) AS {$as}";
+        } else {
+            return "SUM({$value})";
+        }
     }
 
     /**

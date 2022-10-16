@@ -1,5 +1,18 @@
 # Released Notes
 
+## v2.1.0 - (2022-10-16)
+
+### Added
+
+- Added alias in Traits
+- Added `AND` and `OR` methods
+
+### Fixed
+
+- Fixed `select` and `delete` method
+
+------------------------------------------------------------------------
+
 ## v2.0.1 - (2022-10-10)
 
 ### Fixed

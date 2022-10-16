@@ -53,7 +53,7 @@ abstract class Connection
             try {
                 self::$pdo = new PDO(self::$dns, self::$username, self::$password, self::$options);
                 self::$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-                self::$pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, true);
+                self::$pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
 
                 return self::$pdo;
             } catch (\PDOException $e) {

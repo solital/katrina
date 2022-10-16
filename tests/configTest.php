@@ -4,7 +4,7 @@
 define('DB_CONFIG', [
     'DRIVE' => 'mysql',
     'HOST' => 'localhost',
-    'DBNAME' => 'db_teste',
+    'DBNAME' => 'vendascontrol',
     'USER' => 'root',
     'PASS' => ''
 ]);
