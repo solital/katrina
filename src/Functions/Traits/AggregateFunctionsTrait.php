@@ -6,16 +6,22 @@ trait AggregateFunctionsTrait
 {
     /**
      * @param string $value
+     * @param string $as
      * 
      * @return string
      */
-    public static function avg(string $value): string
+    public static function avg(string $value, string $as = ""): string
     {
-        return "AVG({$value})";
+        if ($as != "") {
+            return "AVG({$value}) AS {$as}";
+        } else {
+            return "AVG({$value})";
+        }
     }
 
     /**
      * @param string $expression
+     * @param string $as
      * 
      * @return string
      */
@@ -30,21 +36,31 @@ trait AggregateFunctionsTrait
 
     /**
      * @param string $value
+     * @param string $as
      * 
      * @return string
      */
-    public static function max(string $value): string
+    public static function max(string $value, string $as = ""): string
     {
-        return "MAX({$value})";
+        if ($as != "") {
+            return "MAX({$value}) AS {$as}";
+        } else {
+            return "MAX({$value})";
+        }
     }
 
     /**
      * @param string $value
+     * @param string $as
      * 
      * @return string
      */
-    public static function min(string $value): string
+    public static function min(string $value, string $as = ""): string
     {
-        return "MIN({$value})";
+        if ($as != "") {
+            return "MIN({$value}) AS {$as}";
+        } else {
+            return "MIN({$value})";
+        }
     }
 }

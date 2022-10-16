@@ -8,8 +8,8 @@ use Katrina\Katrina;
 
 class ORMTest extends Katrina
 {
-    protected ?string $table = "table_test";
-    protected ?string $id = "id_orm";
+    protected ?string $table = "tb_creditcard";
+    //protected ?string $id = "id_orm";
     protected bool $timestamp = false;
 
     public function create()

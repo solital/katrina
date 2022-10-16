@@ -14,7 +14,7 @@ class SqlTest extends TestCase
         $this->assertIsArray($res);
     }
 
-    public function testFindActiveRecord()
+    public function testSelectPrimaryKey()
     {
         $res = ORMTest::find(20);
         $this->assertEquals('brenno', $res->nome);
@@ -50,6 +50,13 @@ class SqlTest extends TestCase
         $this->assertIsArray($res);
     }
 
+    public function testAndOr()
+    {
+        $res = ORMTest::select()->where("brand", 'visa')->and("cvv", '502')->get();
+        #$res = ORMTest::select()->where("brand", 'visa')->or("cvv", '502')->get();
+        $this->assertIsArray($res);
+    }
+
     public function testJoin()
     {
         $res = ORMTest::select()
@@ -69,15 +76,15 @@ class SqlTest extends TestCase
 
     public function testSelectInSelect()
     {
-        $sql = ORMTest::select(null, "nome")->where("nome", "brenno")->rawQuery();
-        $res =  ORMTest::select(null, "nome, idade")->where("nome", Functions::subquery($sql))->get();
+        $sql = ORMTest::select("nome")->where("nome", "brenno")->rawQuery();
+        $res =  ORMTest::select("nome, idade")->where("nome", Functions::subquery($sql))->get();
 
         $this->assertIsArray($res);
     }
 
     public function testGroup()
     {
-        $res = ORMTest::select(null, "nome, " . Functions::count(as: 'qtd'))->group("nome")->get();
+        $res = ORMTest::select("nome, " . Functions::count(as: 'qtd'))->group("nome")->get();
         $this->assertIsArray($res);
     }
 

@@ -16,7 +16,7 @@ class Katrina
     /**
      * @var const
      */
-    public const KATRINA_VERSION = "2.0.0";
+    public const KATRINA_VERSION = "2.1.0";
 
     /**
      * @var array
@@ -175,7 +175,7 @@ class Katrina
      * 
      * @return mixed
      */
-    /* public static function find(int $id_table): mixed
+    public static function find(int $id_table): mixed
     {
         $class = get_called_class();
         $id = (new $class())->id;
@@ -185,36 +185,8 @@ class Katrina
         $sql .= ' WHERE ' . (is_null($id) ? 'id' : $id);
         $sql .= " = {$id_table} ;";
 
-        $result = KatrinaStatement::executeQuery($sql, false);
-
-        if ($result) {
-            $newObject = $result->fetchObject(get_called_class());
-        }
-
-        return $result;
-    } */
-
-    /**
-     * @param string $where
-     * 
-     * @return mixed
-     * @throws ConnectionException
-     */
-    /* public function delete(string $where = ""): mixed
-    {
-        if ($where != "" || !empty($where)) {
-            $sql = "DELETE FROM {$this->table} WHERE {$where};";
-
-            return KatrinaStatement::executePrepare($sql);
-        }
-
-        if (isset($this->content[$this->id])) {
-
-            $sql = "DELETE FROM {$this->table} WHERE {$this->id} = {$this->content[$this->id]};";
-
-            return KatrinaStatement::executePrepare($sql);
-        }
-    } */
+        return KatrinaStatement::executeQuery($sql, false);
+    }
 
     /**
      * @param string $filter
@@ -243,14 +215,12 @@ class Katrina
     }
 
     /**
-     * @param int|null $primary_key
-     * @param string|null $where
      * @param string $columns
      * 
      * @return self
      * @throws KatrinaException
      */
-    public static function select(int $primary_key = null, string $columns = "*"): self
+    public static function select(string $columns = "*"): self
     {
         $class = get_called_class();
         $instance = new $class();
@@ -263,10 +233,6 @@ class Katrina
         self::$id_foreign = $instance->id;
 
         self::$static_sql = "SELECT $columns FROM " . self::$table_foreign;
-
-        if (isset($primary_key)) {
-            self::$static_sql = "SELECT $columns FROM " . self::$table_foreign . " WHERE " . self::$id_foreign . " = " . $primary_key;
-        }
 
         return new static;
     }
@@ -300,7 +266,8 @@ class Katrina
             $res = $stmt->execute();
 
             if ($res != true) {
-                throw new KatrinaException($res);
+                $error = $stmt->errorInfo();
+                throw new KatrinaException($error[2]);
             }
 
             return new static;
@@ -343,17 +310,25 @@ class Katrina
     }
 
     /**
-     * @param string $where
+     * @param string $column
+     * @param mixed $value
+     * @param bool $safe_mode
      * 
      * @return mixed
      */
-    public static function delete(string $where): mixed
+    public static function delete(string $column, mixed $value, bool $safe_mode = true): mixed
     {
         $class = get_called_class();
         $instance = new $class();
         self::$table_foreign = $instance->table;
 
-        $sql = "DELETE FROM {$instance->table} WHERE {$where};";
+        if ($safe_mode == false) {
+            $sql = "SET FOREIGN_KEY_CHECKS=0;";
+            $sql .= "DELETE FROM {$instance->table} WHERE {$column} = {$value};";
+            $sql .= "SET FOREIGN_KEY_CHECKS=1;";
+        } else {
+            $sql = "DELETE FROM {$instance->table} WHERE {$column} = {$value};";
+        }
 
         return KatrinaStatement::executePrepare($sql);
     }
@@ -373,7 +348,8 @@ class Katrina
             $res = $stmt->execute();
 
             if ($res != true) {
-                throw new KatrinaException($res);
+                $error = $stmt->errorInfo();
+                throw new KatrinaException($error[2]);
             }
 
             return $res;

@@ -188,6 +188,54 @@ trait ExtendQueryTrait
     }
 
     /**
+     * @param string $column
+     * @param null $condition
+     * @param string $operator
+     * 
+     * @return self
+     */
+    public function and(string $column, $condition = null, string $operator = "="): self
+    {
+        self::$static_sql .= " AND $column";
+
+        if ($condition != null) {
+            if (\is_numeric($condition)) {
+                self::$static_sql .= " $operator $condition";
+            } else if (Functions::getQuery() != "") {
+                self::$static_sql .= " $operator ($condition)";
+            } else {
+                self::$static_sql .= " $operator '$condition'";
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param string $column
+     * @param null $condition
+     * @param string $operator
+     * 
+     * @return self
+     */
+    public function or(string $column, $condition = null, string $operator = "="): self
+    {
+        self::$static_sql .= " OR $column";
+
+        if ($condition != null) {
+            if (\is_numeric($condition)) {
+                self::$static_sql .= " $operator $condition";
+            } else if (Functions::getQuery() != "") {
+                self::$static_sql .= " $operator ($condition)";
+            } else {
+                self::$static_sql .= " $operator '$condition'";
+            }
+        }
+
+        return $this;
+    }
+
+    /**
      * @param string $query
      * 
      * @return mixed

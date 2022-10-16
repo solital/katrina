@@ -22,32 +22,47 @@ trait DateFunctionsTrait
 
     /**
      * @param string $value
+     * @param string $as
      * 
      * @return string
      */
-    public static function date(string $value): string
+    public static function date(string $value, string $as = ''): string
     {
-        return "DATE({$value})";
+        if ($as != '') {
+            return "DATE({$value}) AS {$as}";
+        } else {
+            return "DATE({$value})";
+        }
     }
 
     /**
      * @param string $value
+     * @param string $as
      * 
      * @return string
      */
-    public static function hour(string $value): string
+    public static function hour(string $value, string $as = ''): string
     {
-        return "HOUR({$value})";
+        if ($as != '') {
+            return "HOUR({$value}) AS {$as}";
+        } else {
+            return "HOUR({$value})";
+        }
     }
 
     /**
      * @param string $value
+     * @param string $as
      * 
      * @return string
      */
-    public static function month(string $value): string
+    public static function month(string $value, string $as = ''): string
     {
-        return "MONTH({$value})";
+        if ($as != '') {
+            return "MONTH({$value}) AS {$as}";
+        } else {
+            return "MONTH({$value})";
+        }
     }
 
     /**
@@ -63,6 +78,7 @@ trait DateFunctionsTrait
 
     /**
      * @param string $date
+     * @param string $as
      * 
      * @return string
      */

@@ -2,9 +2,11 @@
 
 namespace Katrina\Functions;
 
-use Katrina\Functions\Traits\DateFunctionsTrait;
-use Katrina\Functions\Traits\AggregateFunctionsTrait;
-use Katrina\Functions\Traits\MathFunctionsTrait;
+use Katrina\Functions\Traits\{
+    DateFunctionsTrait,
+    AggregateFunctionsTrait,
+    MathFunctionsTrait
+};
 
 class Functions
 {
