@@ -16,7 +16,7 @@ class Katrina
     /**
      * @var const
      */
-    public const KATRINA_VERSION = "2.1.0";
+    public const KATRINA_VERSION = "2.1.1";
 
     /**
      * @var array
@@ -322,12 +322,18 @@ class Katrina
         $instance = new $class();
         self::$table_foreign = $instance->table;
 
+        if (is_string($value)) {
+            $quote = "'";
+        } elseif (is_int($value)) {
+            $quote = "";
+        }
+        
         if ($safe_mode == false) {
             $sql = "SET FOREIGN_KEY_CHECKS=0;";
-            $sql .= "DELETE FROM {$instance->table} WHERE {$column} = {$value};";
+            $sql .= "DELETE FROM {$instance->table} WHERE {$column} = " . $quote . $value . $quote . ";";
             $sql .= "SET FOREIGN_KEY_CHECKS=1;";
         } else {
-            $sql = "DELETE FROM {$instance->table} WHERE {$column} = {$value};";
+            $sql = "DELETE FROM {$instance->table} WHERE {$column} = " . $quote . $value . $quote . ";";
         }
 
         return KatrinaStatement::executePrepare($sql);
