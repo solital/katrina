@@ -1,5 +1,14 @@
 # Released Notes
 
+## v2.2.0 - (2023-11-03)
+
+### Added
+
+- Added Cache in `all`, `find`, `get` and `getUnique` methods
+- Added `CacheException`
+
+------------------------------------------------------------------------
+
 ## v2.1.1 - (2023-03-02)
 
 ### Fixed

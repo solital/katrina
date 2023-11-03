@@ -16,7 +16,7 @@ class Katrina
     /**
      * @var const
      */
-    public const KATRINA_VERSION = "2.1.1";
+    public const KATRINA_VERSION = "2.2.0";
 
     /**
      * @var array
@@ -39,6 +39,11 @@ class Katrina
     protected bool $timestamp = true;
 
     /**
+     * @var null|bool
+     */
+    protected ?bool $cache = null;
+
+    /**
      * Construct
      */
     public function __construct()
@@ -49,6 +54,10 @@ class Katrina
         if ($this->id == null) {
             $this->id = 'id';
         }
+
+        $this->config();
+        self::$cache_instance = new Cache;
+        self::$is_cache_active = $this->cache;
     }
 
     /**
@@ -99,6 +108,16 @@ class Katrina
         if (isset($this->content[$this->id])) {
             unset($this->content[$this->id]);
         }
+    }
+
+    /**
+     * @return void
+     */
+    private function config(): void
+    {
+        self::$config = [
+            'cache' => $this->cache
+        ];
     }
 
     /**
@@ -185,7 +204,23 @@ class Katrina
         $sql .= ' WHERE ' . (is_null($id) ? 'id' : $id);
         $sql .= " = {$id_table} ;";
 
-        return KatrinaStatement::executeQuery($sql, false);
+        if (self::$config['cache'] == true) {
+            $cache_values = self::$cache_instance->get($table);
+
+            if (!empty($cache_values) || $cache_values !== false) {
+                return $cache_values;
+            }
+        } else if (self::$config['cache'] == false) {
+            self::$cache_instance->delete($table);
+        }
+
+        $result_values = KatrinaStatement::executeQuery($sql, false);
+
+        if (self::$config['cache'] == true) {
+            self::$cache_instance->set($table, $result_values);
+        }
+
+        return $result_values;
     }
 
     /**
@@ -206,9 +241,25 @@ class Katrina
         $sql .= ($offset > 0) ? " OFFSET {$offset}" : "";
         $sql .= ';';
 
+        if (self::$config['cache'] == true) {
+            $cache_values = self::$cache_instance->get($table);
+
+            if (!empty($cache_values) || $cache_values !== false) {
+                return $cache_values;
+            }
+        } else if (self::$config['cache'] == false) {
+            self::$cache_instance->delete($table);
+        }
+
         try {
             $result = Connection::getInstance()->query($sql);
-            return $result->fetchAll(\PDO::FETCH_CLASS);
+            $result_values = $result->fetchAll(\PDO::FETCH_CLASS);
+
+            if (self::$config['cache'] == true) {
+                self::$cache_instance->set($table, $result_values);
+            }
+
+            return $result_values;
         } catch (\PDOException $e) {
             echo $e->getMessage();
         }
@@ -233,6 +284,7 @@ class Katrina
         self::$id_foreign = $instance->id;
 
         self::$static_sql = "SELECT $columns FROM " . self::$table_foreign;
+        self::$table_name = $instance->table;
 
         return new static;
     }
@@ -327,7 +379,7 @@ class Katrina
         } elseif (is_int($value)) {
             $quote = "";
         }
-        
+
         if ($safe_mode == false) {
             $sql = "SET FOREIGN_KEY_CHECKS=0;";
             $sql .= "DELETE FROM {$instance->table} WHERE {$column} = " . $quote . $value . $quote . ";";
