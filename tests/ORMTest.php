@@ -8,9 +8,11 @@ use Katrina\Katrina;
 
 class ORMTest extends Katrina
 {
-    protected ?string $table = "tb_creditcard";
+    protected ?string $table = "auth_users";
     //protected ?string $id = "id_orm";
     protected bool $timestamp = false;
+
+    //protected ?bool $cache = true;
 
     public function create()
     {

@@ -2,6 +2,7 @@
 
 namespace Katrina\Sql\Traits;
 
+use Katrina\Cache;
 use Katrina\Sql\KatrinaStatement;
 
 trait DDLTrait
@@ -20,6 +21,26 @@ trait DDLTrait
      * @var string
      */
     protected static string $backtips = "";
+
+    /**
+     * @var array
+     */
+    protected static array $config = [];
+
+    /**
+     * @var Cache
+     */
+    protected static Cache $cache_instance;
+
+    /**
+     * @var bool|null
+     */
+    protected static ?bool $is_cache_active;
+
+    /**
+     * @var string
+     */
+    protected static string $table_name;
 
     /**
      * @return void

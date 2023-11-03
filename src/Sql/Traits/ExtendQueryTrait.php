@@ -271,7 +271,23 @@ trait ExtendQueryTrait
      */
     public function get(): mixed
     {
-        return KatrinaStatement::executeQuery(self::$static_sql, true);
+        if (self::$config['cache'] == true) {
+            $cache_values = self::$cache_instance->get(self::$table_name);
+
+            if (!empty($cache_values) || $cache_values !== false) {
+                return $cache_values;
+            }
+        } else if (self::$config['cache'] == false) {
+            self::$cache_instance->delete(self::$table_name);
+        }
+
+        $result_values = KatrinaStatement::executeQuery(self::$static_sql, true);
+
+        if (self::$config['cache'] == true) {
+            self::$cache_instance->set(self::$table_name, $result_values);
+        }
+
+        return $result_values;
     }
 
     /**
@@ -279,6 +295,22 @@ trait ExtendQueryTrait
      */
     public function getUnique(): mixed
     {
-        return KatrinaStatement::executeQuery(self::$static_sql, false);
+        if (self::$config['cache'] == true) {
+            $cache_values = self::$cache_instance->get(self::$table_name);
+
+            if (!empty($cache_values) || $cache_values !== false) {
+                return $cache_values;
+            }
+        } else if (self::$config['cache'] == false) {
+            self::$cache_instance->delete(self::$table_name);
+        }
+
+        $result_values = KatrinaStatement::executeQuery(self::$static_sql, false);
+
+        if (self::$config['cache'] == true) {
+            self::$cache_instance->set(self::$table_name, $result_values);
+        }
+
+        return $result_values;
     }
 }
