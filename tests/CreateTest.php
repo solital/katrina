@@ -108,7 +108,7 @@ class CreateTest extends TestCase
 
     public function testDelete()
     {
-        $orm = ORMTest::delete("id = 2");
+        $orm = ORMTest::delete('id', 2);
         $this->assertTrue($orm);
     }
 }

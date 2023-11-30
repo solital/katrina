@@ -16,7 +16,7 @@ class Katrina
     /**
      * @var const
      */
-    public const KATRINA_VERSION = "2.2.0";
+    public const KATRINA_VERSION = "2.3.0";
 
     /**
      * @var array
@@ -284,6 +284,30 @@ class Katrina
         self::$id_foreign = $instance->id;
 
         self::$static_sql = "SELECT $columns FROM " . self::$table_foreign;
+        self::$table_name = $instance->table;
+
+        return new static;
+    }
+
+    /**
+     * @param string $columns
+     * 
+     * @return self
+     * @throws KatrinaException
+     */
+    public static function latest(string $column = "created_at"): self
+    {
+        $class = get_called_class();
+        $instance = new $class();
+
+        if ($instance->table == null || empty($instance->table)) {
+            throw new KatrinaException($class . ': Table name in database not defined');
+        }
+
+        self::$table_foreign = $instance->table;
+        self::$id_foreign = $instance->id;
+
+        self::$static_sql = "SELECT * FROM " . self::$table_foreign . " ORDER BY " . $column . " DESC";
         self::$table_name = $instance->table;
 
         return new static;

@@ -1,5 +1,14 @@
 # Released Notes
 
+## v2.3.0 - (2023-11-30)
+
+### Added
+
+- Added `latest` method to return latest results
+- Added array in `where` method
+
+------------------------------------------------------------------------
+
 ## v2.2.0 - (2023-11-03)
 
 ### Added
