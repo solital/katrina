@@ -8,7 +8,7 @@ use Katrina\Katrina;
 
 class ORMTest extends Katrina
 {
-    protected ?string $table = "auth_users";
+    protected ?string $table = "users";
     //protected ?string $id = "id_orm";
     protected bool $timestamp = false;
 

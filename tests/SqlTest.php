@@ -93,4 +93,19 @@ class SqlTest extends TestCase
         $res = ORMTest::describeTable('usuarios');
         $this->assertIsArray($res);
     }
+
+    public function testLatest()
+    {
+        $res = ORMTest::latest('id')->get();
+        $this->assertIsArray($res);
+    }
+
+    public function testWhereAsArray()
+    {
+        $res = ORMTest::select()->where([
+            "email", "harvey@email.com",
+            "username", "Harvey"
+        ])->get();
+        $this->assertIsArray($res);
+    }
 }

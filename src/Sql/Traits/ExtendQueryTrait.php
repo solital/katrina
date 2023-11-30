@@ -164,23 +164,32 @@ trait ExtendQueryTrait
     }
 
     /**
-     * @param string $column
-     * @param null|mixed $condition
-     * @param string $operator
+     * @param string|array  $condition_1
+     * @param null|mixed    $condition_2
+     * @param string        $operator
      * 
      * @return self
      */
-    public function where(string $column, $condition = null, string $operator = "="): self
+    public function where(string|array $condition_1, mixed $condition_2 = null, string $operator = "="): self
     {
-        self::$static_sql .= " WHERE $column";
+        if (is_string($condition_1)) {
+            self::$static_sql .= " WHERE $condition_1";
 
-        if ($condition != null) {
-            if (\is_numeric($condition)) {
-                self::$static_sql .= " $operator $condition";
-            } else if (Functions::getQuery() != "") {
-                self::$static_sql .= " $operator ($condition)";
-            } else {
-                self::$static_sql .= " $operator '$condition'";
+            if ($condition_2 != null) {
+                if (\is_numeric($condition_2)) {
+                    self::$static_sql .= " $operator $condition_2";
+                } else if (Functions::getQuery() != "") {
+                    self::$static_sql .= " $operator ($condition_2)";
+                } else {
+                    self::$static_sql .= " $operator '$condition_2'";
+                }
+            }
+        } elseif (is_array($condition_1)) {
+            $data = array_chunk($condition_1, 2);
+            self::$static_sql .= " WHERE " . $data[0][0] . " = '" . $data[0][1] . "'";
+
+            foreach ($data as $value) {
+                self::$static_sql .= " AND " . $value[0] . " = '" . $value[1] . "'";
             }
         }
 
