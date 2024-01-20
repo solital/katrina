@@ -15,7 +15,7 @@ abstract class Connection
     /**
      * @var string
      */
-    private static string $dns;
+    private static string $dns = "";
 
     /**
      * @var string|null
