@@ -108,4 +108,10 @@ class SqlTest extends TestCase
         ])->get();
         $this->assertIsArray($res);
     }
+
+    public function testCount()
+    {
+        $res = ORMTest::count();
+        $this->assertIsInt($res);
+    }
 }

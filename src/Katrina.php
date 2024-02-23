@@ -2,9 +2,9 @@
 
 namespace Katrina;
 
+use Katrina\Connection\Connection;
 use Katrina\Sql\KatrinaStatement;
 use Katrina\Sql\Traits\{PaginationTrait, ExtendQueryTrait, DDLTrait};
-use Katrina\Connection\Connection;
 use Katrina\Exceptions\{KatrinaException, ConnectionException};
 
 class Katrina
@@ -16,7 +16,7 @@ class Katrina
     /**
      * @var const
      */
-    public const KATRINA_VERSION = "2.3.0";
+    public const KATRINA_VERSION = "2.4.0";
 
     /**
      * @var array
@@ -44,6 +44,21 @@ class Katrina
     protected ?bool $cache = null;
 
     /**
+     * @var string|null
+     */
+    protected static ?string $conn = null;
+
+    /**
+     * @var string
+     */
+    protected string $created_at = 'created_at';
+
+    /**
+     * @var string
+     */
+    protected string $updated_at = 'updated_at';
+
+    /**
      * Construct
      */
     public function __construct()
@@ -56,7 +71,7 @@ class Katrina
         }
 
         $this->config();
-        self::$cache_instance = new Cache;
+        self::$cache_instance = new Cache(self::$config['cache']);
         self::$is_cache_active = $this->cache;
     }
 
@@ -153,6 +168,8 @@ class Katrina
     }
 
     /**
+     * Save data in database with Actived Record
+     * 
      * @return mixed
      * @throws ConnectionException
      */
@@ -165,7 +182,7 @@ class Katrina
             $sets = [];
 
             foreach ($newContent as $key => $value) {
-                if ($key === $this->id || $key == 'created_at' || $key == 'updated_at')
+                if ($key === $this->id || $key == $this->created_at || $key == $this->updated_at)
                     continue;
 
                 $sets[] = "{$key} = {$value}";
@@ -173,14 +190,14 @@ class Katrina
 
             if ($this->timestamp === true) {
 
-                $sets[] = "updated_at = '" . date('Y-m-d H:i:s') . "'";
+                $sets[] = $this->updated_at . " = '" . date('Y-m-d H:i:s') . "'";
             }
 
             $sql = "UPDATE {$this->table} SET " . implode(', ', $sets) . " WHERE {$this->id} = {$this->content[$this->id]};";
         } else {
             if ($this->timestamp === true) {
-                $newContent['created_at'] = "'" . date('Y-m-d H:i:s') . "'";
-                $newContent['updated_at'] = "'" . date('Y-m-d H:i:s') . "'";
+                $newContent[$this->created_at] = "'" . date('Y-m-d H:i:s') . "'";
+                $newContent[$this->updated_at] = "'" . date('Y-m-d H:i:s') . "'";
             }
 
             $sql = "INSERT INTO {$this->table} (" . implode(', ', array_keys($newContent)) . ') VALUES (' . implode(',', array_values($newContent)) . ');';
@@ -190,6 +207,8 @@ class Katrina
     }
 
     /**
+     * Find data with ID
+     * 
      * @param int $id_table
      * 
      * @return mixed
@@ -224,6 +243,8 @@ class Katrina
     }
 
     /**
+     * Return all data in a table
+     * 
      * @param string $filter
      * @param int $limit
      * @param int $offset
@@ -266,6 +287,8 @@ class Katrina
     }
 
     /**
+     * 'Select' command
+     * 
      * @param string $columns
      * 
      * @return self
@@ -290,6 +313,8 @@ class Katrina
     }
 
     /**
+     * Return last data in a table
+     * 
      * @param string $columns
      * 
      * @return self
@@ -314,6 +339,8 @@ class Katrina
     }
 
     /**
+     * Insert data in database
+     * 
      * @param array $table_columns
      * 
      * @return self
@@ -353,6 +380,8 @@ class Katrina
     }
 
     /**
+     * Return last ID
+     * 
      * @return int
      */
     public function lastId(): int
@@ -362,6 +391,8 @@ class Katrina
     }
 
     /**
+     * Update data in database
+     * 
      * @param array $table_columns
      * 
      * @return self
@@ -386,6 +417,8 @@ class Katrina
     }
 
     /**
+     * Delete data in database
+     * 
      * @param string $column
      * @param mixed $value
      * @param bool $safe_mode
@@ -416,6 +449,8 @@ class Katrina
     }
 
     /**
+     * Save data with 'update' method
+     * 
      * @return mixed
      */
     public function saveUpdate()
@@ -441,26 +476,29 @@ class Katrina
     }
 
     /**
-     * @param string $fieldName
-     * @param string $filter
+     * Count all values on a table
+     * 
+     * @param string $field_name
+     * @param string $where
      * 
      * @return int
      * @throws ConnectionException
      */
-    public static function count(string $fieldName = '*', string $filter = ''): int
+    public static function count(string $field_name = '*', string $where = ''): int
     {
         $class = get_called_class();
         $table = (new $class())->table;
-        $sql = "SELECT count($fieldName) as t FROM " . (is_null($table) ? strtolower($class) : $table);
-        $sql .= ($filter !== '') ? " WHERE {$filter}" : "";
+        $sql = "SELECT count($field_name) as total FROM " . (is_null($table) ? strtolower($class) : $table);
+        $sql .= ($where !== '') ? " WHERE {$where}" : "";
         $sql .= ';';
 
         $a = KatrinaStatement::executeQuery($sql, false);
-
-        return (int) $a['t'];
+        return (int) $a->total;
     }
 
     /**
+     * Return first data in database
+     * 
      * @param string $filter
      * 
      * @return self
@@ -471,6 +509,8 @@ class Katrina
     }
 
     /**
+     * Check if a table exist in database
+     * 
      * @param string $table
      */
     public static function checkTableExists(string $table)
@@ -484,6 +524,19 @@ class Katrina
     }
 
     /**
+     * Define SQL drive for current query
+     *
+     * @param string $conn
+     * 
+     * @return self
+     */
+    public static function connection(string $conn): self
+    {
+        self::$conn = $conn;
+        return new static;
+    }
+
+    /**
      * @param mixed $value
      * 
      * @return string
@@ -492,13 +545,17 @@ class Katrina
     {
         if (is_string($value) && !empty($value)) {
             return "'" . addslashes($value) . "'";
-        } else if (is_bool($value)) {
-            return $value ? 'TRUE' : 'FALSE';
-        } else if ($value !== '') {
-            return $value;
-        } else {
-            return "NULL";
         }
+
+        if (is_bool($value)) {
+            return $value ? 'TRUE' : 'FALSE';
+        }
+
+        if ($value !== '') {
+            return $value;
+        }
+
+        return "NULL";
     }
 
     /**
