@@ -2,24 +2,42 @@
 
 namespace Katrina;
 
+use Katrina\Cache\{APCuAdapter, MemcacheAdapter, MemcachedAdapter, CacheAdapterInterface};
 use Katrina\Exceptions\CacheException;
-use Memcache;
 
-class Cache
+class Cache implements CacheAdapterInterface
 {
     /**
-     * @var Memcache|null|
+     * @var CacheAdapterInterface
      */
-    private ?Memcache $cache = null;
+    private ?CacheAdapterInterface $cache = null;
 
-    public function __construct()
+    /**
+     * @param string|null $cache_status
+     */
+    public function __construct(?string $cache_status)
     {
-        if (defined('DB_CACHE')) {
-            if (class_exists('Memcache')) {
-                $this->cache = new Memcache();
-                $this->cache->addServer(DB_CACHE['CACHE_HOST'], DB_CACHE['CACHE_PORT']);
+        if ($cache_status != null || $cache_status == true) {
+            if (defined('DB_CACHE')) {
+                switch (DB_CACHE['CACHE_TYPE']) {
+                    case 'memcache':
+                        $this->cache = new MemcacheAdapter();
+                        break;
+
+                    case 'memcached':
+                        $this->cache = new MemcachedAdapter();
+                        break;
+
+                    case 'apcu':
+                        $this->cache = new APCuAdapter();
+                        break;
+
+                    default:
+                        throw new CacheException('Cache driver not found');
+                        break;
+                }
             } else {
-                throw new CacheException("Not connected to cache server");
+                throw new CacheException("Katrina Cache error: Check your 'cache.yaml' file or constants for cache config");
             }
         }
     }
@@ -31,9 +49,9 @@ class Cache
     {
         if ($this->cache != null) {
             return $this->cache->get($key);
-        } else {
-            return null;
         }
+
+        return null;
     }
 
     /**

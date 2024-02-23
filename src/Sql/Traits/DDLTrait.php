@@ -94,10 +94,10 @@ trait DDLTrait
     /**
      * @return self
      */
-    public function createdUpdateAt(): self
+    public function createdUpdatedAt(string $created_at_name = 'created_at', string $updated_at_name = 'updated_at'): self
     {
         $this->created_update_at = true;
-        self::$static_sql .= self::$backtips . "created_at" . self::$backtips . " TIMESTAMP DEFAULT CURRENT_TIMESTAMP, " . self::$backtips . "update_at" . self::$backtips . " DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP";
+        self::$static_sql .= self::$backtips . $created_at_name . self::$backtips . " TIMESTAMP DEFAULT CURRENT_TIMESTAMP, " . self::$backtips . $updated_at_name . self::$backtips . " DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP";
 
         return $this;
     }

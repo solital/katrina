@@ -2,15 +2,14 @@
 
 namespace Katrina\Connection;
 
-use PDO;
 use Katrina\Exceptions\ConnectionException;
 
-abstract class Connection
+class Connection
 {
     /**
-     * @var PDO
+     * @var \PDO
      */
-    private static PDO $pdo;
+    private static \PDO $pdo;
 
     /**
      * @var string
@@ -20,12 +19,32 @@ abstract class Connection
     /**
      * @var string|null
      */
-    private static ?string $username = null;
+    private static ?string $db_drive = null;
 
     /**
      * @var string|null
      */
-    private static ?string $password = null;
+    private static ?string $db_host = null;
+
+    /**
+     * @var string|null
+     */
+    private static ?string $db_name = null;
+
+    /**
+     * @var string|null
+     */
+    private static ?string $db_user = null;
+
+    /**
+     * @var string|null
+     */
+    private static ?string $db_pass = null;
+
+    /**
+     * @var string|null
+     */
+    private static ?string $sqlite_dir = null;
 
     /**
      * @var array|null
@@ -41,19 +60,32 @@ abstract class Connection
     }
 
     /**
-     * Creates an instance of the connection
+     * Creates connection with database and return PDO instance
+     * 
+     * @param null|string $drive Set database drive
      * 
      * @return PDO
+     * @throws ConnectionException
      */
-    public static function getInstance(): PDO
+    public static function getInstance(?string $drive = null): \PDO
     {
-        self::getConnection(DB_CONFIG['DRIVE']);
+        self::defineConfigConstants($drive);
+
+        if (!is_null($drive)) {
+            self::getConnection($drive);
+        } else {
+            self::getConnection(self::$db_drive);
+        }
+
+        if (empty(self::$dns)) {
+            throw new ConnectionException("Main database not configured. Check your '.env' file or constants");
+        }
 
         if (!isset(self::$pdo)) {
             try {
-                self::$pdo = new PDO(self::$dns, self::$username, self::$password, self::$options);
-                self::$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-                self::$pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
+                self::$pdo = new \PDO(self::$dns, self::$db_user, self::$db_pass, self::$options);
+                self::$pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+                self::$pdo->setAttribute(\PDO::ATTR_EMULATE_PREPARES, false);
 
                 return self::$pdo;
             } catch (\PDOException $e) {
@@ -63,22 +95,6 @@ abstract class Connection
         }
 
         return self::$pdo;
-    }
-
-    /**
-     * @return void
-     */
-    private static function verifyExtensions(string $drive): void
-    {
-        if ($drive == "mysql" && !extension_loaded('pdo_mysql')) {
-            ConnectionException::driveNotFound($drive);
-        } elseif ($drive == "sqlite" && !extension_loaded('pdo_sqlite')) {
-            ConnectionException::driveNotFound($drive);
-        } elseif ($drive == "pgsql" && !extension_loaded('pdo_pgsql')) {
-            ConnectionException::driveNotFound($drive);
-        } elseif ($drive == "oci" && !extension_loaded('pdo_oci')) {
-            ConnectionException::driveNotFound($drive);
-        }
     }
 
     /**
@@ -92,12 +108,51 @@ abstract class Connection
 
         if ($drive == "mysql") {
             self::connectionMySql($drive);
-        } elseif ($drive == "pgsql") {
+        }
+
+        if ($drive == "pgsql") {
             self::connectionPgSql($drive);
-        } elseif ($drive == "oci") {
+        }
+
+        if ($drive == "oci") {
             self::connectionOracle($drive);
-        } elseif ($drive == "sqlite") {
+        }
+
+        if ($drive == "sqlite") {
             self::connectionSqlite();
+        }
+    }
+
+    /**
+     * Set configurations using constants 'DB_CONFIG' and 'DB_CONFIG_SECONDARY'
+     * 
+     * @param null|string $drive Set database drive
+     *
+     * @return void
+     */
+    private static function defineConfigConstants(?string $drive): void
+    {
+        if (!is_null($drive)) {
+            if (!defined('DB_CONFIG_SECONDARY')) {
+                throw new ConnectionException("Second database not configured. Check your '.env' file or constants");
+            }
+
+            self::$db_host = DB_CONFIG_SECONDARY['HOST'];
+            self::$db_name = DB_CONFIG_SECONDARY['DBNAME'];
+            self::$db_user = DB_CONFIG_SECONDARY['USER'];
+            self::$db_pass = DB_CONFIG_SECONDARY['PASS'];
+            self::$sqlite_dir = DB_CONFIG_SECONDARY['SQLITE_DIR'];
+        } else {
+            if (!defined('DB_CONFIG')) {
+                throw new ConnectionException("Main database not configured. Check your '.env' file or constants");
+            }
+
+            self::$db_drive = DB_CONFIG['DRIVE'];
+            self::$db_host = DB_CONFIG['HOST'];
+            self::$db_name = DB_CONFIG['DBNAME'];
+            self::$db_user = DB_CONFIG['USER'];
+            self::$db_pass = DB_CONFIG['PASS'];
+            self::$sqlite_dir = DB_CONFIG['SQLITE_DIR'];
         }
     }
 
@@ -108,11 +163,8 @@ abstract class Connection
      */
     private static function connectionMySql(string $drive): void
     {
-        self::$dns = $drive . ":host=" . DB_CONFIG['HOST'] .
-            ";dbname=" . DB_CONFIG['DBNAME'] . ";charset=utf8";
-        self::$username = DB_CONFIG['USER'];
-        self::$password = DB_CONFIG['PASS'];
-        self::$options = [PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8mb4"];
+        self::$dns = $drive . ":host=" . self::$db_host . ";dbname=" . self::$db_name . ";charset=utf8";
+        self::$options = [\PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8mb4"];
     }
 
     /**
@@ -122,9 +174,7 @@ abstract class Connection
      */
     private static function connectionPgSql(string $drive): void
     {
-        self::$dns = $drive . ":host=" . DB_CONFIG['HOST'] . ";dbname=" . DB_CONFIG['DBNAME'];
-        self::$username = DB_CONFIG['USER'];
-        self::$password = DB_CONFIG['PASS'];
+        self::$dns = $drive . ":host=" . self::$db_host . ";dbname=" . self::$db_name;
     }
 
     /**
@@ -134,9 +184,7 @@ abstract class Connection
      */
     private static function connectionOracle(string $drive): void
     {
-        self::$dns = $drive . ":dbname=" . DB_CONFIG['DBNAME'];
-        self::$username = DB_CONFIG['USER'];
-        self::$password = DB_CONFIG['PASS'];
+        self::$dns = $drive . ":dbname=" . self::$db_name;
     }
 
     /**
@@ -144,6 +192,29 @@ abstract class Connection
      */
     private static function connectionSqlite(): void
     {
-        self::$dns = "sqlite:" . DB_CONFIG['SQLITE_DIR'] . DIRECTORY_SEPARATOR . DB_CONFIG['DBNAME'];
+        self::$dns = "sqlite:" . self::$sqlite_dir . DIRECTORY_SEPARATOR . self::$db_name;
+    }
+
+    /**
+     * @return void
+     * @throws ConnectionException
+     */
+    private static function verifyExtensions(string $drive): void
+    {
+        if ($drive == "mysql" && !extension_loaded('pdo_mysql')) {
+            ConnectionException::driveNotFound($drive);
+        }
+
+        if ($drive == "sqlite" && !extension_loaded('pdo_sqlite')) {
+            ConnectionException::driveNotFound($drive);
+        }
+
+        if ($drive == "pgsql" && !extension_loaded('pdo_pgsql')) {
+            ConnectionException::driveNotFound($drive);
+        }
+
+        if ($drive == "oci" && !extension_loaded('pdo_oci')) {
+            ConnectionException::driveNotFound($drive);
+        }
     }
 }

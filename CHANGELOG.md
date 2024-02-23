@@ -1,5 +1,21 @@
 # Released Notes
 
+## v2.4.0 - (2024-02-23)
+
+### Added
+
+- Added multiple database connections
+- Added option to set `created_at` and `updated_at` column names
+- Added cache adapter to Memcache, Memcached and APCu
+- Added `.gitattributes` file
+
+### Fixed
+
+- Fixed `createdUpdatedAt` method name
+- Fixed connection in memcached
+
+------------------------------------------------------------------------
+
 ## v2.3.1 - (2024-01-20)
 
 ### Fixed

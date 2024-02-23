@@ -4,6 +4,7 @@ namespace Katrina\Sql;
 
 use Katrina\Exceptions\KatrinaException;
 use Katrina\Connection\Connection as Connection;
+use Katrina\Katrina;
 
 abstract class KatrinaStatement
 {
@@ -14,9 +15,11 @@ abstract class KatrinaStatement
      */
     public static function generate(string $sql): mixed
     {
+        $conn = self::checkConnection();
+
         try {
             $sql = rtrim($sql, ",");
-            $stmt = Connection::getInstance()->prepare($sql);
+            $stmt = Connection::getInstance($conn)->prepare($sql);
             $res = $stmt->execute();
 
             return $res;
@@ -33,9 +36,11 @@ abstract class KatrinaStatement
      */
     public static function executeQuery(string $sql, ?bool $all): mixed
     {
+        $conn = self::checkConnection();
+
         try {
             $sql = rtrim($sql, ",");
-            $stmt = Connection::getInstance()->query($sql);
+            $stmt = Connection::getInstance($conn)->query($sql);
             $stmt->execute();
 
             if ($all == false) {
@@ -57,9 +62,11 @@ abstract class KatrinaStatement
      */
     public static function executePrepare(string $sql): mixed
     {
+        $conn = self::checkConnection();
+
         try {
             $sql = rtrim($sql, ",");
-            $stmt = Connection::getInstance()->prepare($sql);
+            $stmt = Connection::getInstance($conn)->prepare($sql);
             $res = $stmt->execute();
 
             return $res;
@@ -75,9 +82,11 @@ abstract class KatrinaStatement
      */
     public static function executeFetchAll(string $sql): mixed
     {
+        $conn = self::checkConnection();
+
         try {
             $sql = rtrim($sql, ",");
-            $stmt = Connection::getInstance()->query($sql);
+            $stmt = Connection::getInstance($conn)->query($sql);
             $stmt->execute();
             $res = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
@@ -85,5 +94,14 @@ abstract class KatrinaStatement
         } catch (KatrinaException $e) {
             throw new KatrinaException($e->getMessage());
         }
+    }
+
+    /**
+     * @return string|null
+     */
+    private static function checkConnection(): ?string
+    {
+        $reflection = new \ReflectionClass(Katrina::class);
+        return $reflection->getProperty('conn')->getValue();
     }
 }
