@@ -5,6 +5,7 @@ namespace Katrina\Exceptions;
 class ConnectionException extends \Exception
 {
     /**
+     * @deprecated
      * @param string $drive
      * 
      * @throws ConnectionException

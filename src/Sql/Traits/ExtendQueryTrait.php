@@ -42,6 +42,7 @@ trait ExtendQueryTrait
     private static array $array_values;
 
     /**
+     * @deprecated
      * @param string $column_email
      * @param string $column_pass
      * @param string $email

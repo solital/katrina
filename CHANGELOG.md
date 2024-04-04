@@ -1,5 +1,25 @@
 # Released Notes
 
+## v2.5.0 - (2024-04-04)
+
+### Added
+
+- Added `findWithException` method
+- Added support to UUID to MySQL
+
+### Fixed
+
+- Fixed connection when sqlite not exists
+- Fixed properties names when `$table` and `$id` is null
+- Fixed backtips on `DDLTrait`
+
+### Changed
+
+- Changed `executeFetchAll` and `generate` to deprecated
+- Changed exceptions on `Katrina` and `Connection` classes
+
+------------------------------------------------------------------------
+
 ## v2.4.0 - (2024-02-23)
 
 ### Added

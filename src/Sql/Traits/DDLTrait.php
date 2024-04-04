@@ -3,6 +3,7 @@
 namespace Katrina\Sql\Traits;
 
 use Katrina\Cache;
+use Katrina\Exceptions\KatrinaException;
 use Katrina\Sql\KatrinaStatement;
 
 trait DDLTrait
@@ -18,9 +19,9 @@ trait DDLTrait
     protected static string $static_sql;
 
     /**
-     * @var string
+     * @var null|string
      */
-    protected static string $backtips = "";
+    protected static ?string $backtips = null;
 
     /**
      * @var array
@@ -47,11 +48,10 @@ trait DDLTrait
      */
     private static function getBacktips(): void
     {
-        switch (DB_CONFIG['DRIVE']) {
-            case 'mysql':
-                self::$backtips == "`";
-                break;
-        }
+        self::$backtips = match (DB_CONFIG['DRIVE']) {
+            'mysql' => "`",
+            default => ''
+        };
     }
 
     /**
@@ -62,8 +62,7 @@ trait DDLTrait
     public static function dropTable(string $table): mixed
     {
         self::$static_sql = "DROP TABLE IF EXISTS $table;";
-
-        return KatrinaStatement::generate(self::$static_sql);
+        return KatrinaStatement::executePrepare(self::$static_sql);
     }
 
     /**
@@ -74,7 +73,6 @@ trait DDLTrait
     public static function createTable(string $table): self
     {
         self::$static_sql = "CREATE TABLE IF NOT EXISTS $table (";
-
         return new static;
     }
 
@@ -86,9 +84,7 @@ trait DDLTrait
         self::$static_sql = rtrim(self::$static_sql, ", ");
         self::$static_sql .= ");";
 
-        $res = KatrinaStatement::generate(self::$static_sql);
-
-        return $res;
+        return KatrinaStatement::executePrepare(self::$static_sql);
     }
 
     /**
@@ -96,6 +92,8 @@ trait DDLTrait
      */
     public function createdUpdatedAt(string $created_at_name = 'created_at', string $updated_at_name = 'updated_at'): self
     {
+        self::getBacktips();
+
         $this->created_update_at = true;
         self::$static_sql .= self::$backtips . $created_at_name . self::$backtips . " TIMESTAMP DEFAULT CURRENT_TIMESTAMP, " . self::$backtips . $updated_at_name . self::$backtips . " DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP";
 
@@ -110,26 +108,26 @@ trait DDLTrait
     public static function describeTable(string $table): mixed
     {
         self::$static_sql = "DESCRIBE " . $table;
-
         return KatrinaStatement::executeQuery(self::$static_sql, true);
     }
 
     /**
      * @return mixed
+     * @throws KatrinaException
      */
     public static function listTables(): mixed
     {
-        switch (DB_CONFIG['DRIVE']) {
-            case 'mysql':
-                self::$static_sql = "SHOW TABLES";
-                break;
+        try {
+            self::$static_sql = match (DB_CONFIG['DRIVE']) {
+                'mysql' => "SHOW TABLES",
+                'pgsql' => "SELECT table_name FROM information_schema.tables WHERE table_schema='public'",
+                default => throw new KatrinaException("Database drive " . DB_CONFIG['DRIVE'] . " not found or not valid")
+            };
 
-            case 'pgsql':
-                self::$static_sql = "SELECT table_name FROM information_schema.tables WHERE table_schema='public'";
-                break;
+            return KatrinaStatement::executeQuery(self::$static_sql, true);
+        } catch (KatrinaException $e) {
+            die(KatrinaException::class . ": " . $e->getMessage());
         }
-
-        return KatrinaStatement::executeFetchAll(self::$static_sql);
     }
 
     /**
@@ -158,8 +156,9 @@ trait DDLTrait
      */
     public function alter(string $table): self
     {
-        self::$static_sql = "ALTER TABLE " . self::$backtips . $table . self::$backtips . " KATRINA_STR_REPLACE ";
+        self::getBacktips();
 
+        self::$static_sql = "ALTER TABLE " . self::$backtips . $table . self::$backtips . " KATRINA_STR_REPLACE ";
         return $this;
     }
 
@@ -180,7 +179,6 @@ trait DDLTrait
     public function modify(): mixed
     {
         self::$static_sql = str_replace("KATRINA_STR_REPLACE", "MODIFY COLUMN", self::$static_sql);
-
         return KatrinaStatement::executePrepare(self::$static_sql);
     }
 
@@ -205,8 +203,9 @@ trait DDLTrait
      */
     public function renameTable(string $old_table, string $new_name): mixed
     {
-        self::$static_sql = "RENAME TABLE " . self::$backtips . $old_table . self::$backtips . " TO " . self::$backtips . $new_name . self::$backtips . ";";
+        self::getBacktips();
 
+        self::$static_sql = "RENAME TABLE " . self::$backtips . $old_table . self::$backtips . " TO " . self::$backtips . $new_name . self::$backtips . ";";
         return KatrinaStatement::executePrepare(self::$static_sql);
     }
 
@@ -230,8 +229,9 @@ trait DDLTrait
      */
     public function foreign(string $foreign_key): self
     {
-        self::$static_sql .= "FOREIGN KEY (" . self::$backtips . $foreign_key . self::$backtips . ") ";
+        self::getBacktips();
 
+        self::$static_sql .= "FOREIGN KEY (" . self::$backtips . $foreign_key . self::$backtips . ") ";
         return $this;
     }
 
@@ -242,6 +242,8 @@ trait DDLTrait
      */
     public function constraint(string $constraint): self
     {
+        self::getBacktips();
+
         if (str_contains(self::$static_sql, "KATRINA_STR_REPLACE")) {
             self::$static_sql = str_replace("KATRINA_STR_REPLACE ", "", self::$static_sql);
             self::$static_sql .= "ADD CONSTRAINT " . self::$backtips . $constraint . self::$backtips . " ";
@@ -260,6 +262,8 @@ trait DDLTrait
      */
     public function references(string $references, string $id): mixed
     {
+        self::getBacktips();
+
         self::$static_sql = rtrim(self::$static_sql, ",");
         self::$static_sql .= "REFERENCES " . self::$backtips . $references . self::$backtips . "(" . self::$backtips . $id . self::$backtips . "),";
         self::$static_sql = rtrim(self::$static_sql, ",");
@@ -416,6 +420,8 @@ trait DDLTrait
      */
     public function serial(string $field): self
     {
+        self::getBacktips();
+
         self::$static_sql = rtrim(self::$static_sql, ",");
         self::$static_sql .= self::$backtips . $field . self::$backtips . " SERIAL,";
 
@@ -429,8 +435,9 @@ trait DDLTrait
      */
     public function boolean(string $field): self
     {
-        self::$static_sql .= self::$backtips . $field . self::$backtips . " BOOLEAN,";
+        self::getBacktips();
 
+        self::$static_sql .= self::$backtips . $field . self::$backtips . " BOOLEAN,";
         return $this;
     }
 
@@ -443,8 +450,9 @@ trait DDLTrait
      */
     public function decimal(string $field, int $value1, int $value2): self
     {
-        self::$static_sql .= self::$backtips . $field . self::$backtips . " DECIMAL($value1, $value2),";
+        self::getBacktips();
 
+        self::$static_sql .= self::$backtips . $field . self::$backtips . " DECIMAL($value1, $value2),";
         return $this;
     }
 
@@ -456,8 +464,9 @@ trait DDLTrait
      */
     public function char(string $field, int $size): self
     {
-        self::$static_sql .= self::$backtips . $field . self::$backtips . " CHAR($size),";
+        self::getBacktips();
 
+        self::$static_sql .= self::$backtips . $field . self::$backtips . " CHAR($size),";
         return $this;
     }
 
@@ -469,8 +478,9 @@ trait DDLTrait
      */
     public function varchar(string $field, int $size): self
     {
-        self::$static_sql .= self::$backtips . $field . self::$backtips . " VARCHAR($size),";
+        self::getBacktips();
 
+        self::$static_sql .= self::$backtips . $field . self::$backtips . " VARCHAR($size),";
         return $this;
     }
 
@@ -481,8 +491,9 @@ trait DDLTrait
      */
     public function tinytext(string $field): self
     {
-        self::$static_sql .= self::$backtips . $field . self::$backtips . " TINYTEXT,";
+        self::getBacktips();
 
+        self::$static_sql .= self::$backtips . $field . self::$backtips . " TINYTEXT,";
         return $this;
     }
 
@@ -493,8 +504,9 @@ trait DDLTrait
      */
     public function mediumtext(string $field): self
     {
-        self::$static_sql .= self::$backtips . $field . self::$backtips . " MEDIUMTEXT,";
+        self::getBacktips();
 
+        self::$static_sql .= self::$backtips . $field . self::$backtips . " MEDIUMTEXT,";
         return $this;
     }
 
@@ -505,8 +517,9 @@ trait DDLTrait
      */
     public function longtext(string $field): self
     {
-        self::$static_sql .= self::$backtips . $field . self::$backtips . " LONGTEXT,";
+        self::getBacktips();
 
+        self::$static_sql .= self::$backtips . $field . self::$backtips . " LONGTEXT,";
         return $this;
     }
 
@@ -517,8 +530,9 @@ trait DDLTrait
      */
     public function text(string $field): self
     {
-        self::$static_sql .= self::$backtips . $field . self::$backtips . " TEXT,";
+        self::getBacktips();
 
+        self::$static_sql .= self::$backtips . $field . self::$backtips . " TEXT,";
         return $this;
     }
 
@@ -530,8 +544,9 @@ trait DDLTrait
      */
     public function tinyint(string $field, int $size): self
     {
-        self::$static_sql .= self::$backtips . $field . self::$backtips . " TINYINT($size),";
+        self::getBacktips();
 
+        self::$static_sql .= self::$backtips . $field . self::$backtips . " TINYINT($size),";
         return $this;
     }
 
@@ -543,8 +558,9 @@ trait DDLTrait
      */
     public function smallint(string $field, int $size): self
     {
-        self::$static_sql .= self::$backtips . $field . self::$backtips . " SMALLINT($size),";
+        self::getBacktips();
 
+        self::$static_sql .= self::$backtips . $field . self::$backtips . " SMALLINT($size),";
         return $this;
     }
 
@@ -556,8 +572,9 @@ trait DDLTrait
      */
     public function mediumint(string $field, int $size): self
     {
-        self::$static_sql .= self::$backtips . $field . self::$backtips . " MEDIUMINT($size),";
+        self::getBacktips();
 
+        self::$static_sql .= self::$backtips . $field . self::$backtips . " MEDIUMINT($size),";
         return $this;
     }
 
@@ -569,8 +586,9 @@ trait DDLTrait
      */
     public function bigint(string $field, int $size): self
     {
-        self::$static_sql .= self::$backtips . $field . self::$backtips . " BIGINT($size),";
+        self::getBacktips();
 
+        self::$static_sql .= self::$backtips . $field . self::$backtips . " BIGINT($size),";
         return $this;
     }
 
@@ -582,6 +600,8 @@ trait DDLTrait
      */
     public function int(string $field, ?int $size = null): self
     {
+        self::getBacktips();
+
         if ($size == null) {
             self::$static_sql .= self::$backtips . $field . self::$backtips . " INT,";
         } else {
@@ -598,8 +618,9 @@ trait DDLTrait
      */
     public function date(string $field): self
     {
-        self::$static_sql .= self::$backtips . $field . self::$backtips . " DATE,";
+        self::getBacktips();
 
+        self::$static_sql .= self::$backtips . $field . self::$backtips . " DATE,";
         return $this;
     }
 
@@ -610,8 +631,9 @@ trait DDLTrait
      */
     public function year(string $field): self
     {
-        self::$static_sql .= self::$backtips . $field . self::$backtips . " YEAR,";
+        self::getBacktips();
 
+        self::$static_sql .= self::$backtips . $field . self::$backtips . " YEAR,";
         return $this;
     }
 
@@ -622,8 +644,9 @@ trait DDLTrait
      */
     public function time(string $field): self
     {
-        self::$static_sql .= self::$backtips . $field . self::$backtips . " TIME,";
+        self::getBacktips();
 
+        self::$static_sql .= self::$backtips . $field . self::$backtips . " TIME,";
         return $this;
     }
 
@@ -634,8 +657,9 @@ trait DDLTrait
      */
     public function datetime(string $field): self
     {
-        self::$static_sql .= self::$backtips . $field . self::$backtips . " DATETIME,";
+        self::getBacktips();
 
+        self::$static_sql .= self::$backtips . $field . self::$backtips . " DATETIME,";
         return $this;
     }
 
@@ -646,8 +670,9 @@ trait DDLTrait
      */
     public function timestamp(string $field): self
     {
-        self::$static_sql .= self::$backtips . $field . self::$backtips . " TIMESTAMP,";
+        self::getBacktips();
 
+        self::$static_sql .= self::$backtips . $field . self::$backtips . " TIMESTAMP,";
         return $this;
     }
 }
