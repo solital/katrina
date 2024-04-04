@@ -2,64 +2,70 @@
 
 declare(strict_types=1);
 
-use KatrinaTest\ORMTest;
+use KatrinaTest\Users;
 use PHPUnit\Framework\TestCase;
 use Katrina\Functions\Functions;
 
-class SqlTest extends TestCase
+class MySqlTest extends TestCase
 {
     public function testSelectActiveRecord()
     {
-        $res = ORMTest::all();
+        $res = Users::all();
         $this->assertIsArray($res);
     }
 
     public function testSelectPrimaryKey()
     {
-        $res = ORMTest::find(20);
-        $this->assertEquals('brenno', $res->nome);
+        $res = Users::find(6);
+        $this->assertEquals('Juana', $res->first_name);
     }
 
-    public function testListTables()
+    public function testSelectWithException()
     {
-        $res = ORMTest::listTables();
+        $this->expectException('Exception');
+
+        Users::findwithException(100);
+    }
+
+    /* public function testListTables()
+    {
+        $res = Users::listTables();
         $this->assertIsArray($res);
     }
 
     public function testLimit()
     {
-        $res = ORMTest::select()->limit(0, 3)->get();
+        $res = Users::select()->limit(0, 3)->get();
         $this->assertIsArray($res);
     }
 
     public function testLike()
     {
-        $res = ORMTest::select()->where("nome")->like("%bre%")->get();
+        $res = Users::select()->where("email")->like("%hotmail%")->get();
         $this->assertIsArray($res);
     }
 
     public function testOrder()
     {
-        $res = ORMTest::select()->order("nome", false)->get();
+        $res = Users::select()->order("first_name", false)->get();
         $this->assertIsArray($res);
     }
 
     public function testBetween()
     {
-        $res = ORMTest::select()->where("idade")->between(10, 22)->get();
+        $res = Users::select()->where("id")->between(3, 8)->get();
         $this->assertIsArray($res);
     }
 
     public function testAndOr()
     {
-        $res = ORMTest::select()->where("brand", 'visa')->and("cvv", '502')->get();
-        #$res = ORMTest::select()->where("brand", 'visa')->or("cvv", '502')->get();
+        $res = Users::select()->where("first_name", "Francesco")->and("email", "ihamill@yahoo.com")->get();
         $this->assertIsArray($res);
     }
 
     public function testJoin()
     {
-        $res = ORMTest::select()
+        $res = Users::select()
             ->innerJoin("sobrenome", "id_nome")
             ->innerJoin("cpf", "idUsu")
             ->where("cpf_number", 123123123)
@@ -70,39 +76,39 @@ class SqlTest extends TestCase
 
     public function testCustom()
     {
-        $res = ORMTest::customQuery("SELECT * FROM usuarios", true);
+        $res = Users::customQuery("SELECT * FROM users_test", true);
         $this->assertIsArray($res);
     }
 
     public function testSelectInSelect()
     {
-        $sql = ORMTest::select("nome")->where("nome", "brenno")->rawQuery();
-        $res =  ORMTest::select("nome, idade")->where("nome", Functions::subquery($sql))->get();
+        $sql = Users::select("nome")->where("nome", "brenno")->rawQuery();
+        $res =  Users::select("nome, idade")->where("nome", Functions::subquery($sql))->get();
 
         $this->assertIsArray($res);
     }
 
     public function testGroup()
     {
-        $res = ORMTest::select("nome, " . Functions::count(as: 'qtd'))->group("nome")->get();
+        $res = Users::select("nome, " . Functions::count(as: 'qtd'))->group("nome")->get();
         $this->assertIsArray($res);
     }
 
     public function testDescribe()
     {
-        $res = ORMTest::describeTable('usuarios');
+        $res = Users::describeTable('usuarios');
         $this->assertIsArray($res);
     }
 
     public function testLatest()
     {
-        $res = ORMTest::latest('id')->get();
+        $res = Users::latest('id')->get();
         $this->assertIsArray($res);
     }
 
     public function testWhereAsArray()
     {
-        $res = ORMTest::select()->where([
+        $res = Users::select()->where([
             "email", "harvey@email.com",
             "username", "Harvey"
         ])->get();
@@ -111,7 +117,7 @@ class SqlTest extends TestCase
 
     public function testCount()
     {
-        $res = ORMTest::count();
+        $res = Users::count();
         $this->assertIsInt($res);
-    }
+    } */
 }

@@ -51,14 +51,6 @@ class Connection
      */
     private static ?array $options = null;
 
-    private function __construct()
-    {
-    }
-
-    private function __clone()
-    {
-    }
-
     /**
      * Creates connection with database and return PDO instance
      * 
@@ -141,7 +133,10 @@ class Connection
             self::$db_name = DB_CONFIG_SECONDARY['DBNAME'];
             self::$db_user = DB_CONFIG_SECONDARY['USER'];
             self::$db_pass = DB_CONFIG_SECONDARY['PASS'];
-            self::$sqlite_dir = DB_CONFIG_SECONDARY['SQLITE_DIR'];
+
+            if (isset(DB_CONFIG_SECONDARY['SQLITE_DIR'])) {
+                self::$sqlite_dir = DB_CONFIG_SECONDARY['SQLITE_DIR'];
+            }
         } else {
             if (!defined('DB_CONFIG')) {
                 throw new ConnectionException("Main database not configured. Check your '.env' file or constants");
@@ -152,7 +147,10 @@ class Connection
             self::$db_name = DB_CONFIG['DBNAME'];
             self::$db_user = DB_CONFIG['USER'];
             self::$db_pass = DB_CONFIG['PASS'];
-            self::$sqlite_dir = DB_CONFIG['SQLITE_DIR'];
+
+            if (isset(DB_CONFIG['SQLITE_DIR'])) {
+                self::$sqlite_dir = DB_CONFIG['SQLITE_DIR'];
+            }
         }
     }
 
@@ -196,25 +194,39 @@ class Connection
     }
 
     /**
+     * @param string $drive
+     * 
      * @return void
      * @throws ConnectionException
      */
     private static function verifyExtensions(string $drive): void
     {
-        if ($drive == "mysql" && !extension_loaded('pdo_mysql')) {
-            ConnectionException::driveNotFound($drive);
-        }
+        try {
+            if ($drive == "mysql" && !extension_loaded('pdo_mysql')) {
+                throw new ConnectionException("Extension for MySQL not installed or not enabled");
+            }
 
-        if ($drive == "sqlite" && !extension_loaded('pdo_sqlite')) {
-            ConnectionException::driveNotFound($drive);
-        }
+            if ($drive == "pgsql" && !extension_loaded('pdo_pgsql')) {
+                throw new ConnectionException("Extension for PostgreSQL not installed or not enabled");
+            }
 
-        if ($drive == "pgsql" && !extension_loaded('pdo_pgsql')) {
-            ConnectionException::driveNotFound($drive);
-        }
+            if ($drive == "sqlite" && !extension_loaded('pdo_sqlite')) {
+                throw new ConnectionException("Extension for SQLite not installed or not enabled");
+            }
 
-        if ($drive == "oci" && !extension_loaded('pdo_oci')) {
-            ConnectionException::driveNotFound($drive);
+            if ($drive == "oci" && !extension_loaded('pdo_oci')) {
+                throw new ConnectionException("Extension for Oracle not installed or not enabled");
+            }
+        } catch (ConnectionException $e) {
+            die(ConnectionException::class . ": " . $e->getMessage());
         }
+    }
+
+    private function __construct()
+    {
+    }
+
+    private function __clone()
+    {
     }
 }

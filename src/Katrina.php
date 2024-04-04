@@ -2,21 +2,23 @@
 
 namespace Katrina;
 
+use Symfony\Component\Uid\Uuid;
 use Katrina\Connection\Connection;
+use Katrina\Exceptions\KatrinaException;
 use Katrina\Sql\KatrinaStatement;
-use Katrina\Sql\Traits\{PaginationTrait, ExtendQueryTrait, DDLTrait};
-use Katrina\Exceptions\{KatrinaException, ConnectionException};
+use Katrina\Sql\Traits\{PaginationTrait, ExtendQueryTrait, DDLTrait, UuidTrait};
 
 class Katrina
 {
     use PaginationTrait;
     use ExtendQueryTrait;
+    use UuidTrait;
     use DDLTrait;
 
     /**
      * @var const
      */
-    public const KATRINA_VERSION = "2.4.0";
+    public const KATRINA_VERSION = "2.5.0";
 
     /**
      * @var array
@@ -59,15 +61,25 @@ class Katrina
     protected string $updated_at = 'updated_at';
 
     /**
+     * @var bool|null
+     */
+    protected ?bool $uuid_increment = false;
+
+    /**
      * Construct
      */
     public function __construct()
     {
         if ($this->table == null) {
-            $this->table = strtolower(get_class($this));
+            $this->table = strtolower(self::getClassWithoutNamespace($this));
         }
+
         if ($this->id == null) {
             $this->id = 'id';
+        }
+
+        if ($this->uuid_increment === true && DB_CONFIG['DRIVE'] != "mysql") {
+            throw new KatrinaException("uuid is available only in MySQL");
         }
 
         $this->config();
@@ -126,16 +138,6 @@ class Katrina
     }
 
     /**
-     * @return void
-     */
-    private function config(): void
-    {
-        self::$config = [
-            'cache' => $this->cache
-        ];
-    }
-
-    /**
      * @return array
      */
     public function toArray(): array
@@ -145,8 +147,10 @@ class Katrina
 
     /**
      * @param array $array
+     * 
+     * @return void
      */
-    public function fromArray(array $array)
+    public function fromArray(array $array): void
     {
         $this->content = $array;
     }
@@ -161,8 +165,10 @@ class Katrina
 
     /**
      * @param string $json
+     * 
+     * @return void
      */
-    public function fromJson(string $json)
+    public function fromJson(string $json): void
     {
         $this->content = json_decode($json);
     }
@@ -171,17 +177,15 @@ class Katrina
      * Save data in database with Actived Record
      * 
      * @return mixed
-     * @throws ConnectionException
      */
     public function save(): mixed
     {
-        $newContent = $this->convertContent();
+        $new_content = $this->convertContent();
 
         if (isset($this->content[$this->id])) {
-
             $sets = [];
 
-            foreach ($newContent as $key => $value) {
+            foreach ($new_content as $key => $value) {
                 if ($key === $this->id || $key == $this->created_at || $key == $this->updated_at)
                     continue;
 
@@ -189,18 +193,21 @@ class Katrina
             }
 
             if ($this->timestamp === true) {
-
                 $sets[] = $this->updated_at . " = '" . date('Y-m-d H:i:s') . "'";
             }
 
             $sql = "UPDATE {$this->table} SET " . implode(', ', $sets) . " WHERE {$this->id} = {$this->content[$this->id]};";
         } else {
             if ($this->timestamp === true) {
-                $newContent[$this->created_at] = "'" . date('Y-m-d H:i:s') . "'";
-                $newContent[$this->updated_at] = "'" . date('Y-m-d H:i:s') . "'";
+                $new_content[$this->created_at] = "'" . date('Y-m-d H:i:s') . "'";
+                $new_content[$this->updated_at] = "'" . date('Y-m-d H:i:s') . "'";
             }
 
-            $sql = "INSERT INTO {$this->table} (" . implode(', ', array_keys($newContent)) . ') VALUES (' . implode(',', array_values($newContent)) . ');';
+            if ($this->uuid_increment === true) {
+                $new_content[$this->id] = "'" . Uuid::v4()->toBinary() . "'";
+            }
+
+            $sql = "INSERT INTO {$this->table} (" . implode(', ', array_keys($new_content)) . ') VALUES (' . implode(',', array_values($new_content)) . ');';
         }
 
         return KatrinaStatement::executePrepare($sql);
@@ -216,30 +223,50 @@ class Katrina
     public static function find(int $id_table): mixed
     {
         $class = get_called_class();
-        $id = (new $class())->id;
-        $table = (new $class())->table;
+        $instance = new $class;
 
-        $sql = 'SELECT * FROM ' . (is_null($table) ? strtolower($class) : $table);
-        $sql .= ' WHERE ' . (is_null($id) ? 'id' : $id);
-        $sql .= " = {$id_table} ;";
+        $table = (is_null($instance->table) ? strtolower(self::getClassWithoutNamespace($class)) : $instance->table);
+        $id = (is_null($instance->id) ? 'id' : $instance->id);
+
+        $sql = 'SELECT * FROM ' . $table . ' WHERE ' . $id . " = {$id_table} ;";
 
         if (self::$config['cache'] == true) {
-            $cache_values = self::$cache_instance->get($table);
+            $cache_values = self::$cache_instance->get($instance->table);
 
             if (!empty($cache_values) || $cache_values !== false) {
                 return $cache_values;
             }
         } else if (self::$config['cache'] == false) {
-            self::$cache_instance->delete($table);
+            self::$cache_instance->delete($instance->table);
         }
 
         $result_values = KatrinaStatement::executeQuery($sql, false);
 
         if (self::$config['cache'] == true) {
-            self::$cache_instance->set($table, $result_values);
+            self::$cache_instance->set($instance->table, $result_values);
         }
 
         return $result_values;
+    }
+
+    /**
+     * Find data with ID and throws exception if not exists
+     *
+     * @param int $id_table
+     * 
+     * @return mixed
+     * @throws KatrinaException
+     */
+    public static function findwithException(int $id_table): mixed
+    {
+        $result = self::find($id_table);
+
+        if ($result === false) {
+            http_response_code(404);
+            throw new KatrinaException("Data not found", 404);
+        }
+
+        return $result;
     }
 
     /**
@@ -255,8 +282,11 @@ class Katrina
     public static function all(string $filter = '', int $limit = 0, int $offset = 0): mixed
     {
         $class = get_called_class();
-        $table = (new $class())->table;
-        $sql = 'SELECT * FROM ' . (is_null($table) ? strtolower($class) : $table);
+        $instance = new $class;
+
+        $table = (is_null($instance->table) ? strtolower(self::getClassWithoutNamespace($class)) : $instance->table);
+
+        $sql = 'SELECT * FROM ' . $table;
         $sql .= ($filter !== '') ? " WHERE {$filter}" : "";
         $sql .= ($limit > 0) ? " LIMIT {$limit}" : "";
         $sql .= ($offset > 0) ? " OFFSET {$offset}" : "";
@@ -292,19 +322,14 @@ class Katrina
      * @param string $columns
      * 
      * @return self
-     * @throws KatrinaException
      */
     public static function select(string $columns = "*"): self
     {
         $class = get_called_class();
-        $instance = new $class();
+        $instance = new $class;
 
-        if ($instance->table == null || empty($instance->table)) {
-            throw new KatrinaException($class . ': Table name in database not defined');
-        }
-
-        self::$table_foreign = $instance->table;
-        self::$id_foreign = $instance->id;
+        self::$table_foreign = (is_null($instance->table) ? strtolower(self::getClassWithoutNamespace($class)) : $instance->table);
+        self::$id_foreign = (is_null($instance->id) ? 'id' : $instance->id);
 
         self::$static_sql = "SELECT $columns FROM " . self::$table_foreign;
         self::$table_name = $instance->table;
@@ -318,19 +343,14 @@ class Katrina
      * @param string $columns
      * 
      * @return self
-     * @throws KatrinaException
      */
     public static function latest(string $column = "created_at"): self
     {
         $class = get_called_class();
-        $instance = new $class();
+        $instance = new $class;
 
-        if ($instance->table == null || empty($instance->table)) {
-            throw new KatrinaException($class . ': Table name in database not defined');
-        }
-
-        self::$table_foreign = $instance->table;
-        self::$id_foreign = $instance->id;
+        self::$table_foreign = (is_null($instance->table) ? strtolower(self::getClassWithoutNamespace($class)) : $instance->table);
+        self::$id_foreign = (is_null($instance->id) ? 'id' : $instance->id);
 
         self::$static_sql = "SELECT * FROM " . self::$table_foreign . " ORDER BY " . $column . " DESC";
         self::$table_name = $instance->table;
@@ -344,11 +364,14 @@ class Katrina
      * @param array $table_columns
      * 
      * @return self
+     * @throws KatrinaException
      */
     public static function insert(array $table_columns): self
     {
         $class = get_called_class();
-        $instance = new $class();
+        $instance = new $class;
+
+        $table = (is_null($instance->table) ? strtolower(self::getClassWithoutNamespace($class)) : $instance->table);
 
         $array_columns = array_keys($table_columns);
         $columns = implode(",", $array_columns);
@@ -358,8 +381,7 @@ class Katrina
         $values = rtrim($array_values2, ",");
 
         try {
-            $sql = "INSERT INTO " . $instance->table . " (" . ($columns) . ") VALUES (" . $values . ")";
-
+            $sql = "INSERT INTO " . $table . " (" . ($columns) . ") VALUES (" . $values . ")";
             $stmt = Connection::getInstance()->prepare($sql);
 
             for ($i = 0, $b = 1; $i < count($array_columns), $b <= count($array_columns); $i++, $b++) {
@@ -375,7 +397,7 @@ class Katrina
 
             return new static;
         } catch (KatrinaException $e) {
-            echo $e->getMessage();
+            die($e->getMessage());
         }
     }
 
@@ -400,12 +422,14 @@ class Katrina
     public static function update(array $table_columns): self
     {
         $class = get_called_class();
-        $instance = new $class();
+        $instance = new $class;
+
+        $table = (is_null($instance->table) ? strtolower(self::getClassWithoutNamespace($class)) : $instance->table);
 
         self::$array_columns = array_keys($table_columns);
         self::$array_values = array_values($table_columns);
 
-        self::$static_sql = "UPDATE $instance->table SET ";
+        self::$static_sql = "UPDATE $table SET ";
 
         for ($i = 0, $b = 1; $i < count(self::$array_columns), $b <= count(self::$array_columns); $i++, $b++) {
             self::$static_sql .= self::$array_columns[$i] . " = ?,";
@@ -428,8 +452,9 @@ class Katrina
     public static function delete(string $column, mixed $value, bool $safe_mode = true): mixed
     {
         $class = get_called_class();
-        $instance = new $class();
-        self::$table_foreign = $instance->table;
+        $instance = new $class;
+
+        self::$table_foreign = (is_null($instance->table) ? strtolower(self::getClassWithoutNamespace($class)) : $instance->table);
 
         if (is_string($value)) {
             $quote = "'";
@@ -452,8 +477,9 @@ class Katrina
      * Save data with 'update' method
      * 
      * @return mixed
+     * @throws KatrinaException
      */
-    public function saveUpdate()
+    public function saveUpdate(): mixed
     {
         try {
             $stmt = Connection::getInstance()->prepare(self::$static_sql);
@@ -471,7 +497,7 @@ class Katrina
 
             return $res;
         } catch (KatrinaException $e) {
-            echo $e->getMessage();
+            die($e->getMessage());
         }
     }
 
@@ -482,13 +508,15 @@ class Katrina
      * @param string $where
      * 
      * @return int
-     * @throws ConnectionException
      */
     public static function count(string $field_name = '*', string $where = ''): int
     {
         $class = get_called_class();
-        $table = (new $class())->table;
-        $sql = "SELECT count($field_name) as total FROM " . (is_null($table) ? strtolower($class) : $table);
+        $instance = new $class;
+
+        $table = (is_null($instance->table) ? strtolower(self::getClassWithoutNamespace($class)) : $instance->table);
+
+        $sql = "SELECT count($field_name) as total FROM " . $table;
         $sql .= ($where !== '') ? " WHERE {$where}" : "";
         $sql .= ';';
 
@@ -501,9 +529,9 @@ class Katrina
      * 
      * @param string $filter
      * 
-     * @return self
+     * @return mixed
      */
-    public static function findFisrt(string $filter = ''): self
+    public static function findFirst(string $filter = ''): mixed
     {
         return self::all($filter, 1);
     }
@@ -512,8 +540,11 @@ class Katrina
      * Check if a table exist in database
      * 
      * @param string $table
+     * @return mixed
+     * 
+     * @throws PDOException
      */
-    public static function checkTableExists(string $table)
+    public static function checkTableExists(string $table): mixed
     {
         try {
             $result = Connection::getInstance()->prepare("SHOW TABLES LIKE '$table'");
@@ -572,5 +603,27 @@ class Katrina
         }
 
         return $newContent;
+    }
+
+    /**
+     * @return void
+     */
+    private function config(): void
+    {
+        self::$config = [
+            'cache' => $this->cache
+        ];
+    }
+
+    /**
+     * Get the class "basename" of the given object / class.
+     *
+     * @param  string|object  $class
+     * @return string
+     */
+    private static function getClassWithoutNamespace(string|object $class): string
+    {
+        $class = is_object($class) ? get_class($class) : $class;
+        return basename(str_replace('\\', '/', $class));
     }
 }

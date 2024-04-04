@@ -3,15 +3,19 @@
 namespace Katrina\Sql;
 
 use Katrina\Exceptions\KatrinaException;
-use Katrina\Connection\Connection as Connection;
+use Katrina\Connection\Connection;
 use Katrina\Katrina;
 
 abstract class KatrinaStatement
 {
     /**
+     * Execute SQL command with PDO `prepare` method
+     * 
+     * @deprecated Use `executePrepare` method
      * @param string $sql
      * 
      * @return mixed
+     * @throws KatrinaException
      */
     public static function generate(string $sql): mixed
     {
@@ -29,10 +33,13 @@ abstract class KatrinaStatement
     }
 
     /**
+     * Get one or many data from table
+     * 
      * @param string $sql
      * @param bool $all
      * 
      * @return mixed
+     * @throws KatrinaException
      */
     public static function executeQuery(string $sql, ?bool $all): mixed
     {
@@ -56,9 +63,12 @@ abstract class KatrinaStatement
     }
 
     /**
+     * Execute SQL command with PDO `prepare` method
+     * 
      * @param string $sql
      * 
      * @return mixed
+     * @throws KatrinaException
      */
     public static function executePrepare(string $sql): mixed
     {
@@ -76,9 +86,13 @@ abstract class KatrinaStatement
     }
 
     /**
+     * Get many data from table
+     * 
+     * @deprecated Use `executeQuery` method
      * @param string $sql
      * 
      * @return mixed
+     * @throws KatrinaException
      */
     public static function executeFetchAll(string $sql): mixed
     {
