@@ -5,6 +5,8 @@ namespace Katrina\Functions\Traits;
 trait AggregateFunctionsTrait
 {
     /**
+     * Calculates the average value of a set of values
+     * 
      * @param string $value
      * @param string $as
      * 
@@ -12,14 +14,12 @@ trait AggregateFunctionsTrait
      */
     public static function avg(string $value, string $as = ""): string
     {
-        if ($as != "") {
-            return "AVG({$value}) AS {$as}";
-        } else {
-            return "AVG({$value})";
-        }
+        return "AVG({$value})" . ($as != "" ? " AS " . $as : "");
     }
 
     /**
+     * Returns the number of the values in a set
+     * 
      * @param string $expression
      * @param string $as
      * 
@@ -27,14 +27,12 @@ trait AggregateFunctionsTrait
      */
     public static function count(string $expression = "*", string $as = ""): string
     {
-        if ($as != "") {
-            return "COUNT({$expression}) AS {$as}";
-        } else {
-            return "COUNT({$expression})";
-        }
+        return "COUNT({$expression})" . ($as != "" ? " AS " . $as : "");
     }
 
     /**
+     * Returns the maximum value in a set
+     * 
      * @param string $value
      * @param string $as
      * 
@@ -42,14 +40,12 @@ trait AggregateFunctionsTrait
      */
     public static function max(string $value, string $as = ""): string
     {
-        if ($as != "") {
-            return "MAX({$value}) AS {$as}";
-        } else {
-            return "MAX({$value})";
-        }
+        return "MAX({$value})" . ($as != "" ? " AS " . $as : "");
     }
 
     /**
+     * Returns the minimum value in a set of values
+     * 
      * @param string $value
      * @param string $as
      * 
@@ -57,10 +53,32 @@ trait AggregateFunctionsTrait
      */
     public static function min(string $value, string $as = ""): string
     {
-        if ($as != "") {
-            return "MIN({$value}) AS {$as}";
-        } else {
-            return "MIN({$value})";
-        }
+        return "MIN({$value})" . ($as != "" ? " AS " . $as : "");
+    }
+
+    /**
+     * Returns the sum of values in a set
+     * 
+     * @param string $value
+     * @param string $as
+     * 
+     * @return string
+     */
+    public static function sum(string $value, string $as = ""): string
+    {
+        return "SUM({$value})" . ($as != "" ? " AS " . $as : "");
+    }
+
+    /**
+     * Concatenates a set of strings and returns the concatenated string
+     * 
+     * @param string $sql
+     * @param string $as
+     * 
+     * @return string
+     */
+    public static function groupConcat(string $sql, string $as = ""): string
+    {
+        return "GROUP_CONCAT({$sql})" . ($as != "" ? " AS " . $as : "");
     }
 }

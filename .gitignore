@@ -1,8 +1,6 @@
 composer.lock
 vendor/
-tests/tmp/*
 /nbproject/
-index.php
 tests.php
 .phpunit.result.cache
 .phpunit.cache

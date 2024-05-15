@@ -2,11 +2,9 @@
 
 namespace Katrina\Sql\Traits;
 
-use Katrina\Cache;
-use Katrina\Exceptions\KatrinaException;
 use Katrina\Sql\KatrinaStatement;
 
-trait DDLTrait
+trait DataTypesTrait
 {
     /**
      * @var bool
@@ -22,16 +20,6 @@ trait DDLTrait
      * @var null|string
      */
     protected static ?string $backtips = null;
-
-    /**
-     * @var array
-     */
-    protected static array $config = [];
-
-    /**
-     * @var Cache
-     */
-    protected static Cache $cache_instance;
 
     /**
      * @var bool|null
@@ -55,114 +43,28 @@ trait DDLTrait
     }
 
     /**
-     * @param string $table
-     * 
-     * @return mixed
-     */
-    public static function dropTable(string $table): mixed
-    {
-        self::$static_sql = "DROP TABLE IF EXISTS $table;";
-        return KatrinaStatement::executePrepare(self::$static_sql);
-    }
-
-    /**
-     * @param string $table
+     * Add a `created_at` and `updated_at` on dable
      * 
      * @return self
      */
-    public static function createTable(string $table): self
-    {
-        self::$static_sql = "CREATE TABLE IF NOT EXISTS $table (";
-        return new static;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function closeTable(): mixed
-    {
-        self::$static_sql = rtrim(self::$static_sql, ", ");
-        self::$static_sql .= ");";
-
-        return KatrinaStatement::executePrepare(self::$static_sql);
-    }
-
-    /**
-     * @return self
-     */
-    public function createdUpdatedAt(string $created_at_name = 'created_at', string $updated_at_name = 'updated_at'): self
-    {
+    public function createdUpdatedAt(
+        string $created_at_name = 'created_at',
+        string $updated_at_name = 'updated_at'
+    ): self {
         self::getBacktips();
 
         $this->created_update_at = true;
-        self::$static_sql .= self::$backtips . $created_at_name . self::$backtips . " TIMESTAMP DEFAULT CURRENT_TIMESTAMP, " . self::$backtips . $updated_at_name . self::$backtips . " DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP";
 
-        return $this;
+        self::$static_sql .= self::$backtips . $created_at_name .
+            self::$backtips . " TIMESTAMP DEFAULT CURRENT_TIMESTAMP, " . self::$backtips .
+            $updated_at_name . self::$backtips . " DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP";
+        
+            return $this;
     }
 
     /**
-     * @param string $table
+     * Use add() method together with the data type to add a new field.
      * 
-     * @return mixed
-     */
-    public static function describeTable(string $table): mixed
-    {
-        self::$static_sql = "DESCRIBE " . $table;
-        return KatrinaStatement::executeQuery(self::$static_sql, true);
-    }
-
-    /**
-     * @return mixed
-     * @throws KatrinaException
-     */
-    public static function listTables(): mixed
-    {
-        try {
-            self::$static_sql = match (DB_CONFIG['DRIVE']) {
-                'mysql' => "SHOW TABLES",
-                'pgsql' => "SELECT table_name FROM information_schema.tables WHERE table_schema='public'",
-                default => throw new KatrinaException("Database drive " . DB_CONFIG['DRIVE'] . " not found or not valid")
-            };
-
-            return KatrinaStatement::executeQuery(self::$static_sql, true);
-        } catch (KatrinaException $e) {
-            die(KatrinaException::class . ": " . $e->getMessage());
-        }
-    }
-
-    /**
-     * @param string $table
-     * @param bool $check_foreign_key
-     * 
-     * @return mixed
-     */
-    public function truncate(string $table, bool $check_foreign_key = false): mixed
-    {
-        if ($check_foreign_key == true) {
-            self::$static_sql = "SET FOREIGN_KEY_CHECKS=0;";
-            self::$static_sql .= "TRUNCATE TABLE $table;";
-            self::$static_sql .= "SET FOREIGN_KEY_CHECKS=1;";
-        } else {
-            self::$static_sql = "TRUNCATE TABLE $table;";
-        }
-
-        return KatrinaStatement::executePrepare(self::$static_sql);
-    }
-
-    /**
-     * @param string $table
-     * 
-     * @return self
-     */
-    public function alter(string $table): self
-    {
-        self::getBacktips();
-
-        self::$static_sql = "ALTER TABLE " . self::$backtips . $table . self::$backtips . " KATRINA_STR_REPLACE ";
-        return $this;
-    }
-
-    /**
      * @return mixed
      */
     public function add(): mixed
@@ -174,6 +76,8 @@ trait DDLTrait
     }
 
     /**
+     * Use the modify() method to modify a database table.
+     * 
      * @return mixed
      */
     public function modify(): mixed
@@ -183,6 +87,8 @@ trait DDLTrait
     }
 
     /**
+     * Use the rename() method to rename a database table.
+     * 
      * @param string $new_name
      * 
      * @return mixed
@@ -196,20 +102,8 @@ trait DDLTrait
     }
 
     /**
-     * @param string $old_table
-     * @param string $new_name
+     * Use the drop() method to delete a column from the table.
      * 
-     * @return mixed
-     */
-    public function renameTable(string $old_table, string $new_name): mixed
-    {
-        self::getBacktips();
-
-        self::$static_sql = "RENAME TABLE " . self::$backtips . $old_table . self::$backtips . " TO " . self::$backtips . $new_name . self::$backtips . ";";
-        return KatrinaStatement::executePrepare(self::$static_sql);
-    }
-
-    /**
      * @param string $column
      * 
      * @return mixed
@@ -223,6 +117,8 @@ trait DDLTrait
     }
 
     /**
+     * To add a foreign key to an already created table, use the constraint() method to add a constraint; foreign() to inform the column and references() to refer to the table.
+     * 
      * @param string $foreign_key
      * 
      * @return self
@@ -236,6 +132,8 @@ trait DDLTrait
     }
 
     /**
+     * To add a foreign key to an already created table, use the constraint() method to add a constraint; foreign() to inform the column and references() to refer to the table.
+     * 
      * @param string $constraint
      * 
      * @return self
@@ -255,6 +153,8 @@ trait DDLTrait
     }
 
     /**
+     * To add a foreign key to an already created table, use the constraint() method to add a constraint; foreign() to inform the column and references() to refer to the table.
+     * 
      * @param string $references
      * @param string $id
      * 
@@ -276,6 +176,8 @@ trait DDLTrait
     }
 
     /**
+     * Define the field as primary key
+     * 
      * @return self
      */
     public function primary(): self
@@ -287,6 +189,8 @@ trait DDLTrait
     }
 
     /**
+     * Define the field as not null
+     * 
      * @return self
      */
     public function notNull(): self
@@ -326,6 +230,8 @@ trait DDLTrait
     }
 
     /**
+     * Define the field as default
+     * 
      * @param string $default
      * 
      * @return self
@@ -345,6 +251,8 @@ trait DDLTrait
     }
 
     /**
+     * Define the field as unique
+     * 
      * @return self
      */
     public function unique(): self
@@ -356,6 +264,8 @@ trait DDLTrait
     }
 
     /**
+     * Define the field as unsigned
+     * 
      * @return self
      */
     public function unsigned(): self
@@ -367,6 +277,8 @@ trait DDLTrait
     }
 
     /**
+     * Add a column after another
+     * 
      * @param string $column
      * 
      * @return self
@@ -385,6 +297,8 @@ trait DDLTrait
     }
 
     /**
+     * Add a column first
+     * 
      * @return self
      */
     public function first(): self
@@ -401,7 +315,7 @@ trait DDLTrait
     }
 
     /**
-     * MYSQL
+     * [MYSQL] Define the field to increment
      * 
      * @return self
      */
@@ -414,7 +328,7 @@ trait DDLTrait
     }
 
     /**
-     * POSTGRESQL
+     * [POSTGRESQL] Define the field to increment
      * 
      * @return self
      */
@@ -429,6 +343,8 @@ trait DDLTrait
     }
 
     /**
+     * Define the field as boolean
+     * 
      * @param string $field
      * 
      * @return self
@@ -442,6 +358,8 @@ trait DDLTrait
     }
 
     /**
+     * Define the field as decimal
+     * 
      * @param string $field
      * @param int $value1
      * @param int $value2
@@ -457,6 +375,8 @@ trait DDLTrait
     }
 
     /**
+     * Define the field as char
+     * 
      * @param string $field
      * @param int $size
      * 
@@ -471,6 +391,8 @@ trait DDLTrait
     }
 
     /**
+     * Define the field as varchar
+     * 
      * @param string $field
      * @param string $size
      * 
@@ -485,6 +407,8 @@ trait DDLTrait
     }
 
     /**
+     * Define the field as tinytext
+     * 
      * @param string $field
      * 
      * @return self
@@ -498,6 +422,8 @@ trait DDLTrait
     }
 
     /**
+     * Define the field as mediumtext
+     * 
      * @param string $field
      * 
      * @return self
@@ -511,6 +437,8 @@ trait DDLTrait
     }
 
     /**
+     * Define the field as longtext
+     * 
      * @param string $field
      * 
      * @return self
@@ -524,6 +452,8 @@ trait DDLTrait
     }
 
     /**
+     * Define the field as text
+     * 
      * @param string $field
      * 
      * @return self
@@ -537,6 +467,8 @@ trait DDLTrait
     }
 
     /**
+     * Define the field as tinyint
+     * 
      * @param string $field
      * @param int $size
      * 
@@ -551,6 +483,8 @@ trait DDLTrait
     }
 
     /**
+     * Define the field as smallint
+     * 
      * @param string $field
      * @param int $size
      * 
@@ -565,6 +499,8 @@ trait DDLTrait
     }
 
     /**
+     * Define the field as mediumint
+     * 
      * @param string $field
      * @param int $size
      * 
@@ -579,6 +515,8 @@ trait DDLTrait
     }
 
     /**
+     * Define the field as bigint
+     * 
      * @param string $field
      * @param int $size
      * 
@@ -593,6 +531,8 @@ trait DDLTrait
     }
 
     /**
+     * Define the field as int
+     * 
      * @param string $field
      * @param null|int $size
      * 
@@ -612,6 +552,8 @@ trait DDLTrait
     }
 
     /**
+     * Define the field as date
+     * 
      * @param string $field
      * 
      * @return self
@@ -625,6 +567,8 @@ trait DDLTrait
     }
 
     /**
+     * Define the field as year
+     * 
      * @param string $field
      * 
      * @return self
@@ -638,6 +582,8 @@ trait DDLTrait
     }
 
     /**
+     * Define the field as time
+     * 
      * @param string $field
      * 
      * @return self
@@ -651,6 +597,8 @@ trait DDLTrait
     }
 
     /**
+     * Define the field as datetime
+     * 
      * @param string $field
      * 
      * @return self
@@ -664,6 +612,8 @@ trait DDLTrait
     }
 
     /**
+     * Define the field as timestamp
+     * 
      * @param string $field
      * 
      * @return self

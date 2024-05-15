@@ -1,6 +1,6 @@
 <?php
 
-namespace KatrinaTest;
+namespace KatrinaTest\Models;
 
 use Katrina\Functions\Functions;
 use Katrina\Connection\Connection;
@@ -8,7 +8,7 @@ use Katrina\Katrina;
 
 class ORMTest extends Katrina
 {
-    protected ?string $table = "users";
+    protected ?string $table = "table_test";
     //protected ?string $id = "id_orm";
     protected bool $timestamp = true;
 
@@ -16,7 +16,7 @@ class ORMTest extends Katrina
     protected string $created_at = 'created_date';
     protected string $updated_at = 'updated_date';
 
-    public function create()
+    public static function create()
     {
         $res = self::createTable("table_test")
             ->int('id_orm')->primary()->increment()
@@ -29,17 +29,7 @@ class ORMTest extends Katrina
         return $res;
     }
 
-    public function listAllTables()
-    {
-        return self::listTables();
-    }
-
-    public function describe()
-    {
-        return self::describeTable('usuarios');
-    }
-
-    public function transaction()
+    public static function transaction()
     {
         try {
             $pdo = Connection::getInstance();

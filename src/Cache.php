@@ -2,7 +2,7 @@
 
 namespace Katrina;
 
-use Katrina\Cache\{APCuAdapter, MemcacheAdapter, MemcachedAdapter, CacheAdapterInterface};
+use Katrina\Cache\{APCuAdapter, MemcacheAdapter, MemcachedAdapter, CacheAdapterInterface, YacAdapter};
 use Katrina\Exceptions\CacheException;
 
 class Cache implements CacheAdapterInterface
@@ -30,6 +30,10 @@ class Cache implements CacheAdapterInterface
 
                     case 'apcu':
                         $this->cache = new APCuAdapter();
+                        break;
+
+                    case 'yac':
+                        $this->cache = new YacAdapter();
                         break;
 
                     default:

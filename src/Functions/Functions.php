@@ -2,18 +2,17 @@
 
 namespace Katrina\Functions;
 
+use Symfony\Component\Uid\Uuid;
 use Katrina\Functions\Traits\{
     DateFunctionsTrait,
     AggregateFunctionsTrait,
-    MathFunctionsTrait
+    MathFunctionsTrait,
+    StringFunctionsTrait
 };
-use Symfony\Component\Uid\Uuid;
 
 class Functions
 {
-    use AggregateFunctionsTrait;
-    use DateFunctionsTrait;
-    use MathFunctionsTrait;
+    use AggregateFunctionsTrait, DateFunctionsTrait, MathFunctionsTrait, StringFunctionsTrait;
 
     const NULL = 'NULL';
 
@@ -23,6 +22,8 @@ class Functions
     private static string $query = "";
 
     /**
+     * Use an raw SQL inside another query
+     * 
      * @param string $query
      * 
      * @return string
@@ -34,6 +35,24 @@ class Functions
     }
 
     /**
+     * Create a custom database function
+     *
+     * @param string $function_name
+     * @param string $query
+     * @param string $as
+     * 
+     * @return string
+     */
+    public static function custom(string $function_name, string $query, string $as = ""): string
+    {
+        $function_name = strtoupper($function_name);
+        $result = $function_name . "(" . $query . ")";
+        return $result . ($as != "" ? " AS " . $as : "");
+    }
+
+    /**
+     * Get raw SQL query
+     * 
      * @return string
      */
     public static function getQuery(): string

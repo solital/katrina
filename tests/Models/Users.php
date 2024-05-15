@@ -1,6 +1,6 @@
 <?php
 
-namespace KatrinaTest;
+namespace KatrinaTest\Models;
 
 use Katrina\Katrina;
 

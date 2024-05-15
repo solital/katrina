@@ -1,5 +1,28 @@
 # Released Notes
 
+## v2.6.0 - (2024-05-15)
+
+### Added
+
+- Added Yac cache support
+- Added new tests and SQL file
+- Added new functions: `groupConcat`, `min`, `year`, `round`, 
+    `concat`, `ltrim`, `rtrim`, `trim` and `custom`
+
+### Fixed
+
+- Fixed `update` method without `where` method
+
+### Changed
+
+- Changed trait structures
+
+### Removed
+
+- Removed `verifyLogin`, `generate`, `customQuery` and `executeFetchAll` methods
+
+------------------------------------------------------------------------
+
 ## v2.5.0 - (2024-04-04)
 
 ### Added
