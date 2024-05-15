@@ -9,30 +9,6 @@ use Katrina\Katrina;
 abstract class KatrinaStatement
 {
     /**
-     * Execute SQL command with PDO `prepare` method
-     * 
-     * @deprecated Use `executePrepare` method
-     * @param string $sql
-     * 
-     * @return mixed
-     * @throws KatrinaException
-     */
-    public static function generate(string $sql): mixed
-    {
-        $conn = self::checkConnection();
-
-        try {
-            $sql = rtrim($sql, ",");
-            $stmt = Connection::getInstance($conn)->prepare($sql);
-            $res = $stmt->execute();
-
-            return $res;
-        } catch (KatrinaException $e) {
-            throw new KatrinaException($e->getMessage());
-        }
-    }
-
-    /**
      * Get one or many data from table
      * 
      * @param string $sql
@@ -78,31 +54,6 @@ abstract class KatrinaStatement
             $sql = rtrim($sql, ",");
             $stmt = Connection::getInstance($conn)->prepare($sql);
             $res = $stmt->execute();
-
-            return $res;
-        } catch (KatrinaException $e) {
-            throw new KatrinaException($e->getMessage());
-        }
-    }
-
-    /**
-     * Get many data from table
-     * 
-     * @deprecated Use `executeQuery` method
-     * @param string $sql
-     * 
-     * @return mixed
-     * @throws KatrinaException
-     */
-    public static function executeFetchAll(string $sql): mixed
-    {
-        $conn = self::checkConnection();
-
-        try {
-            $sql = rtrim($sql, ",");
-            $stmt = Connection::getInstance($conn)->query($sql);
-            $stmt->execute();
-            $res = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
             return $res;
         } catch (KatrinaException $e) {

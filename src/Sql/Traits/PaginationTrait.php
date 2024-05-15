@@ -24,6 +24,8 @@ trait PaginationTrait
     protected int $pg;
 
     /**
+     * Creates a system for paging results
+     * 
      * @param string $table
      * @param int $limit
      * @param array|null $innerjoin
@@ -77,6 +79,8 @@ trait PaginationTrait
     }
 
     /**
+     * Creates a system for paging results with custom SQL query
+     * 
      * @param string $query
      * @param int $limit
      * @param string $previous_name
@@ -114,6 +118,8 @@ trait PaginationTrait
     }
 
     /**
+     * Gets rows from pagination
+     * 
      * @return mixed
      */
     public function getRows(): mixed
@@ -122,6 +128,8 @@ trait PaginationTrait
     }
 
     /**
+     * Gets arrows from pagination
+     * 
      * @return string
      */
     public function getArrows(string $previous_name = "<<", string $next_name = ">>"): string

@@ -2,12 +2,15 @@
 
 namespace KatrinaTest;
 
+use Katrina\Exceptions\ConnectionException;
+use KatrinaTest\Models\ORMTest;
 use PHPUnit\Framework\TestCase;
 
 class ConnTest extends TestCase
 {
-    public function testInsert()
+    public function testExtensionNotFound()
     {
-        dd(ORMTest::connection('pgsql')::select()->get());
+        $this->expectException(ConnectionException::class);
+        ORMTest::connection('pgsql')::select()->get();
     }
 }

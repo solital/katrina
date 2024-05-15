@@ -6,7 +6,7 @@ use Katrina\Exceptions\KatrinaException;
 
 trait UuidTrait
 {
-    use DDLTrait;
+    use DataTypesTrait;
 
     /**
      * @param string $field

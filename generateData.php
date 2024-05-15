@@ -5,7 +5,7 @@ declare(strict_types=1);
 require_once "vendor/autoload.php";
 require_once 'tests/configTest.php';
 
-use KatrinaTest\Users;
+use KatrinaTest\Models\Users;
 
 $faker = Faker\Factory::create();
 
