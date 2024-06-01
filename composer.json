@@ -1,7 +1,7 @@
 {
     "name": "solital/katrina",
     "description": "Official Solital ORM for database abstraction",
-    "version": "2.5.0",
+    "version": "2.6.0",
     "license": "MIT",
     "keywords": [
         "orm",
