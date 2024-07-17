@@ -5,6 +5,7 @@ namespace Katrina\Sql;
 use Katrina\Exceptions\KatrinaException;
 use Katrina\Connection\Connection;
 use Katrina\Katrina;
+use SensitiveParameter;
 
 abstract class KatrinaStatement
 {
@@ -17,7 +18,7 @@ abstract class KatrinaStatement
      * @return mixed
      * @throws KatrinaException
      */
-    public static function executeQuery(string $sql, ?bool $all): mixed
+    public static function executeQuery(#[SensitiveParameter] string $sql, ?bool $all): mixed
     {
         $conn = self::checkConnection();
 
@@ -46,7 +47,7 @@ abstract class KatrinaStatement
      * @return mixed
      * @throws KatrinaException
      */
-    public static function executePrepare(string $sql): mixed
+    public static function executePrepare(#[SensitiveParameter] string $sql): mixed
     {
         $conn = self::checkConnection();
 

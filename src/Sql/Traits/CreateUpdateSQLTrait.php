@@ -5,6 +5,7 @@ namespace Katrina\Sql\Traits;
 use Katrina\Connection\Connection;
 use Katrina\Exceptions\KatrinaException;
 use Katrina\Sql\KatrinaStatement;
+use SensitiveParameter;
 
 trait CreateUpdateSQLTrait
 {
@@ -33,7 +34,7 @@ trait CreateUpdateSQLTrait
      * @return self
      * @throws KatrinaException
      */
-    public static function insert(array $table_columns): self
+    public static function insert(#[SensitiveParameter] array $table_columns): self
     {
         $class = get_called_class();
         $instance = new $class;
@@ -64,7 +65,7 @@ trait CreateUpdateSQLTrait
 
             return new static;
         } catch (KatrinaException $e) {
-            die($e->getMessage(). ": ". self::$static_sql);
+            die($e->getMessage() . ": " . self::$static_sql);
         }
     }
 
@@ -86,7 +87,7 @@ trait CreateUpdateSQLTrait
      * 
      * @return self
      */
-    public static function update(array $table_columns): self
+    public static function update(#[SensitiveParameter] array $table_columns): self
     {
         $class = get_called_class();
         $instance = new $class;
@@ -116,8 +117,11 @@ trait CreateUpdateSQLTrait
      * 
      * @return mixed
      */
-    public static function delete(string $column, mixed $value, bool $safe_mode = true): mixed
-    {
+    public static function delete(
+        #[SensitiveParameter] string $column,
+        #[SensitiveParameter] mixed $value,
+        bool $safe_mode = true
+    ): mixed {
         $class = get_called_class();
         $instance = new $class;
 
@@ -152,7 +156,7 @@ trait CreateUpdateSQLTrait
             if (!str_contains(self::$static_sql, "WHERE")) {
                 throw new KatrinaException("Update method must have `WHERE` method");
             }
-            
+
             $stmt = Connection::getInstance()->prepare(self::$static_sql);
 
             for ($i = 0, $b = 1; $i < count(self::$array_columns), $b <= count(self::$array_columns); $i++, $b++) {
@@ -168,7 +172,7 @@ trait CreateUpdateSQLTrait
 
             return $res;
         } catch (KatrinaException $e) {
-            die($e->getMessage(). ": ". self::$static_sql);
+            die($e->getMessage() . ": " . self::$static_sql);
         }
     }
 }

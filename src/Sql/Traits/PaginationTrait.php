@@ -5,6 +5,7 @@ namespace Katrina\Sql\Traits;
 use Katrina\Connection\Connection as Connection;
 use Katrina\Exceptions\PaginationException;
 use PDO;
+use SensitiveParameter;
 
 trait PaginationTrait
 {
@@ -33,11 +34,14 @@ trait PaginationTrait
      * 
      * @return self
      */
-    public function pagination(string $table, int $limit, array $innerjoin = null, string $where = null): self
-    {
+    public function pagination(
+        #[SensitiveParameter] string $table,
+        int $limit,
+        #[SensitiveParameter] array $innerjoin = null,
+        #[SensitiveParameter] string $where = null
+    ): self {
         if ($limit == 0 || $limit <= 0) {
             throw new PaginationException("Error in 'pagination(): Division by zero'");
-            die;
         }
 
         $this->pg = (isset($_GET['page'])) ? (int)$_GET['page'] : 1;
@@ -88,11 +92,10 @@ trait PaginationTrait
      * 
      * @return self
      */
-    public function customPagination(string $query, int $limit): self
+    public function customPagination(#[SensitiveParameter] string $query, int $limit): self
     {
         if ($limit == 0 || $limit <= 0) {
             throw new PaginationException("Error in 'pagination(): Division by zero'");
-            die;
         }
 
         $this->pg = (isset($_GET['page'])) ? (int)$_GET['page'] : 1;
