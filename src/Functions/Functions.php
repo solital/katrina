@@ -9,6 +9,7 @@ use Katrina\Functions\Traits\{
     MathFunctionsTrait,
     StringFunctionsTrait
 };
+use SensitiveParameter;
 
 class Functions
 {
@@ -28,7 +29,7 @@ class Functions
      * 
      * @return string
      */
-    public static function subquery(string $query): string
+    public static function subquery(#[SensitiveParameter] string $query): string
     {
         self::$query = $query;
         return self::$query;
@@ -43,8 +44,11 @@ class Functions
      * 
      * @return string
      */
-    public static function custom(string $function_name, string $query, string $as = ""): string
-    {
+    public static function custom(
+        string $function_name,
+        #[SensitiveParameter] string $query,
+        string $as = ""
+    ): string {
         $function_name = strtoupper($function_name);
         $result = $function_name . "(" . $query . ")";
         return $result . ($as != "" ? " AS " . $as : "");

@@ -7,6 +7,7 @@ use Katrina\Connection\Connection;
 use Katrina\Exceptions\KatrinaException;
 use Katrina\Functions\Functions;
 use Katrina\Sql\KatrinaStatement;
+use SensitiveParameter;
 
 trait ReadSQLTrait
 {
@@ -96,14 +97,21 @@ trait ReadSQLTrait
      * @param int $offset
      * 
      * @return mixed
-     * @throws PDOException
+     * @throws \PDOException
      */
-    public static function all(string $filter = '', int $limit = 0, int $offset = 0): mixed
-    {
+    public static function all(
+        #[SensitiveParameter] string $filter = '',
+        int $limit = 0,
+        int $offset = 0
+    ): mixed {
         $class = get_called_class();
         $instance = new $class;
 
-        $table = (is_null($instance->table) ? strtolower(self::getClassWithoutNamespace($class)) : $instance->table);
+        $table = (
+            is_null($instance->table) ?
+            strtolower(self::getClassWithoutNamespace($class)) :
+            $instance->table
+        );
 
         $sql = 'SELECT * FROM ' . $table;
         $sql .= ($filter !== '') ? " WHERE {$filter}" : "";
@@ -114,9 +122,7 @@ trait ReadSQLTrait
         if (self::$config['cache'] == true) {
             $cache_values = self::$cache_instance->get($table);
 
-            if (!empty($cache_values) || $cache_values !== false) {
-                return $cache_values;
-            }
+            if (!empty($cache_values) || $cache_values !== false) return $cache_values;
         } else if (self::$config['cache'] == false) {
             self::$cache_instance->delete($table);
         }
@@ -125,14 +131,13 @@ trait ReadSQLTrait
             $result = Connection::getInstance()->query($sql);
             $result_values = $result->fetchAll(\PDO::FETCH_CLASS);
 
-            if (self::$config['cache'] == true) {
-                self::$cache_instance->set($table, $result_values);
-            }
-
+            if (self::$config['cache'] == true) self::$cache_instance->set($table, $result_values);
             return $result_values;
         } catch (\PDOException $e) {
             echo $e->getMessage();
         }
+
+        return null;
     }
 
     /**
@@ -143,12 +148,18 @@ trait ReadSQLTrait
      * 
      * @return int
      */
-    public static function count(string $field_name = '*', string $where = ''): int
-    {
+    public static function count(
+        #[SensitiveParameter] string $field_name = '*',
+        #[SensitiveParameter] string $where = ''
+    ): int {
         $class = get_called_class();
         $instance = new $class;
 
-        $table = (is_null($instance->table) ? strtolower(self::getClassWithoutNamespace($class)) : $instance->table);
+        $table = (
+            is_null($instance->table) ?
+            strtolower(self::getClassWithoutNamespace($class)) :
+            $instance->table
+        );
 
         $sql = "SELECT count($field_name) as total FROM " . $table;
         $sql .= ($where !== '') ? " WHERE {$where}" : "";
@@ -165,7 +176,7 @@ trait ReadSQLTrait
      * 
      * @return mixed
      */
-    public static function findFirst(string $filter = ''): mixed
+    public static function findFirst(#[SensitiveParameter] string $filter = ''): mixed
     {
         return self::all($filter, 1);
     }
@@ -177,14 +188,18 @@ trait ReadSQLTrait
      * 
      * @return self
      */
-    public static function select(string $columns = "*"): self
+    public static function select(#[SensitiveParameter] string $columns = "*"): self
     {
         $class = get_called_class();
         $instance = new $class;
 
-        self::$table_foreign = (is_null($instance->table) ? strtolower(self::getClassWithoutNamespace($class)) : $instance->table);
-        self::$id_foreign = (is_null($instance->id) ? 'id' : $instance->id);
+        self::$table_foreign = (
+            is_null($instance->table) ?
+            strtolower(self::getClassWithoutNamespace($class)) :
+            $instance->table
+        );
 
+        self::$id_foreign = (is_null($instance->id) ? 'id' : $instance->id);
         self::$static_sql = "SELECT $columns FROM " . self::$table_foreign;
         self::$table_name = $instance->table;
 
@@ -198,14 +213,18 @@ trait ReadSQLTrait
      * 
      * @return self
      */
-    public static function latest(string $column = "created_at"): self
+    public static function latest(#[SensitiveParameter] string $column = "created_at"): self
     {
         $class = get_called_class();
         $instance = new $class;
 
-        self::$table_foreign = (is_null($instance->table) ? strtolower(self::getClassWithoutNamespace($class)) : $instance->table);
-        self::$id_foreign = (is_null($instance->id) ? 'id' : $instance->id);
+        self::$table_foreign = (
+            is_null($instance->table) ?
+            strtolower(self::getClassWithoutNamespace($class)) :
+            $instance->table
+        );
 
+        self::$id_foreign = (is_null($instance->id) ? 'id' : $instance->id);
         self::$static_sql = "SELECT * FROM " . self::$table_foreign . " ORDER BY " . $column . " DESC";
         self::$table_name = $instance->table;
 
@@ -220,10 +239,11 @@ trait ReadSQLTrait
      * 
      * @return self
      */
-    public function innerJoin(string $table_foreign, string $foreign_key): self
-    {
+    public function innerJoin(
+        #[SensitiveParameter] string $table_foreign,
+        #[SensitiveParameter] string $foreign_key
+    ): self {
         self::$static_sql .= " INNER JOIN " . $table_foreign . " ON " . $table_foreign . "." . $foreign_key . "=" . self::$table_foreign . "." . self::$id_foreign . " ";
-
         return $this;
     }
 
@@ -255,7 +275,7 @@ trait ReadSQLTrait
      * 
      * @return self
      */
-    public function like(string $like): self
+    public function like(#[SensitiveParameter] string $like): self
     {
         self::$static_sql = rtrim(self::$static_sql, ",");
         self::$static_sql .= " LIKE '" . $like . "'";
@@ -271,7 +291,7 @@ trait ReadSQLTrait
      * 
      * @return self
      */
-    public function order(string $column, bool $asc = true): self
+    public function order(#[SensitiveParameter] string $column, bool $asc = true): self
     {
         if ($asc == false) {
             $this->growing = "DESC";
@@ -291,8 +311,10 @@ trait ReadSQLTrait
      * 
      * @return self
      */
-    public function between(mixed $first_value, mixed $second_value): self
-    {
+    public function between(
+        #[SensitiveParameter] mixed $first_value,
+        #[SensitiveParameter] mixed $second_value
+    ): self {
         self::$static_sql = rtrim(self::$static_sql, ",");
         self::$static_sql .= " BETWEEN " . $first_value . " AND " . $second_value;
 
@@ -306,7 +328,7 @@ trait ReadSQLTrait
      * 
      * @return self
      */
-    public function group(string $column): self
+    public function group(#[SensitiveParameter] string $column): self
     {
         self::$static_sql = rtrim(self::$static_sql, ",");
         self::$static_sql .= " GROUP BY " . $column;
@@ -315,14 +337,19 @@ trait ReadSQLTrait
     }
 
     /**
+     * Filter results
+     * 
      * @param string|array  $condition_1
      * @param null|mixed    $condition_2
      * @param string        $operator
      * 
      * @return self
      */
-    public function where(string|array $condition_1, mixed $condition_2 = null, string $operator = "="): self
-    {
+    public function where(
+        #[SensitiveParameter] string|array $condition_1,
+        #[SensitiveParameter] mixed $condition_2 = null,
+        string $operator = "="
+    ): self {
         if (is_string($condition_1)) {
             self::$static_sql .= " WHERE $condition_1";
 
@@ -351,17 +378,20 @@ trait ReadSQLTrait
      * Displays a record if all the conditions separated by AND are TRUE.
      * 
      * @param string $column
-     * @param null $condition
+     * @param mixed $condition
      * @param string $operator
      * 
      * @return self
      */
-    public function and(string $column, $condition = null, string $operator = "="): self
-    {
+    public function and(
+        #[SensitiveParameter] string $column,
+        #[SensitiveParameter] mixed $condition = null,
+        string $operator = "="
+    ): self {
         self::$static_sql .= " AND $column";
 
         if ($condition != null) {
-            if (\is_numeric($condition)) {
+            if (is_numeric($condition)) {
                 self::$static_sql .= " $operator $condition";
             } else if (Functions::getQuery() != "") {
                 self::$static_sql .= " $operator ($condition)";
@@ -377,13 +407,16 @@ trait ReadSQLTrait
      * Displays a record if any of the conditions separated by OR is TRUE.
      * 
      * @param string $column
-     * @param null $condition
+     * @param mixed $condition
      * @param string $operator
      * 
      * @return self
      */
-    public function or(string $column, $condition = null, string $operator = "="): self
-    {
+    public function or(
+        #[SensitiveParameter] string $column,
+        #[SensitiveParameter] mixed $condition = null,
+        string $operator = "="
+    ): self {
         self::$static_sql .= " OR $column";
 
         if ($condition != null) {

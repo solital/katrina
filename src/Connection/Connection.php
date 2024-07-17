@@ -56,7 +56,7 @@ class Connection
      * 
      * @param null|string $drive Set database drive
      * 
-     * @return PDO
+     * @return \PDO
      * @throws ConnectionException
      */
     public static function getInstance(?string $drive = null): \PDO
@@ -82,7 +82,6 @@ class Connection
                 return self::$pdo;
             } catch (\PDOException $e) {
                 throw new \PDOException("Database connection error: " . $e->getMessage());
-                die();
             }
         }
 

@@ -3,6 +3,7 @@
 namespace Katrina\Sql\Traits;
 
 use Katrina\Sql\KatrinaStatement;
+use SensitiveParameter;
 
 trait DataTypesTrait
 {
@@ -153,7 +154,8 @@ trait DataTypesTrait
     }
 
     /**
-     * To add a foreign key to an already created table, use the constraint() method to add a constraint; foreign() to inform the column and references() to refer to the table.
+     * To add a foreign key to an already created table, use the constraint() method to add a constraint; 
+     * foreign() to inform the column and references() to refer to the table.
      * 
      * @param string $references
      * @param string $id
@@ -283,7 +285,7 @@ trait DataTypesTrait
      * 
      * @return self
      */
-    public function after(string $column): self
+    public function after(#[SensitiveParameter] string $column): self
     {
         $comma = substr(self::$static_sql, -1);
 
@@ -332,7 +334,7 @@ trait DataTypesTrait
      * 
      * @return self
      */
-    public function serial(string $field): self
+    public function serial(#[SensitiveParameter] string $field): self
     {
         self::getBacktips();
 

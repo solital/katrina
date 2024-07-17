@@ -2,6 +2,7 @@
 
 namespace Katrina;
 
+use SensitiveParameter;
 use Symfony\Component\Uid\Uuid;
 use Katrina\Connection\Connection;
 use Katrina\Exceptions\KatrinaException;
@@ -12,10 +13,7 @@ class Katrina
 {
     use PaginationTrait, ExtendQueryTrait, DataTypesTrait, TableHandleTrait, UuidTrait;
 
-    /**
-     * @var const
-     */
-    public const KATRINA_VERSION = "2.6.0";
+    public const KATRINA_VERSION = "2.6.1";
 
     /**
      * @var array
@@ -67,13 +65,8 @@ class Katrina
      */
     public function __construct()
     {
-        if ($this->table == null) {
-            $this->table = strtolower(self::getClassWithoutNamespace($this));
-        }
-
-        if ($this->id == null) {
-            $this->id = 'id';
-        }
+        if ($this->table == null) $this->table = strtolower(self::getClassWithoutNamespace($this));
+        if ($this->id == null) $this->id = 'id';
 
         if ($this->uuid_increment === true && DB_CONFIG['DRIVE'] != "mysql") {
             throw new KatrinaException("uuid is available only in MySQL");
@@ -129,9 +122,7 @@ class Katrina
      */
     private function __clone()
     {
-        if (isset($this->content[$this->id])) {
-            unset($this->content[$this->id]);
-        }
+        if (isset($this->content[$this->id])) unset($this->content[$this->id]);
     }
 
     /**
@@ -216,9 +207,9 @@ class Katrina
      * @param string $table
      * @return mixed
      * 
-     * @throws PDOException
+     * @throws \PDOException
      */
-    public static function checkTableExists(string $table): mixed
+    public static function checkTableExists(#[SensitiveParameter] string $table): mixed
     {
         try {
             $result = Connection::getInstance()->prepare("SHOW TABLES LIKE '$table'");
@@ -226,6 +217,8 @@ class Katrina
         } catch (\PDOException $e) {
             echo $e->getMessage();
         }
+
+        return null;
     }
 
     /**

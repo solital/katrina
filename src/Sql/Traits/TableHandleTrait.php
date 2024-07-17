@@ -4,6 +4,7 @@ namespace Katrina\Sql\Traits;
 
 use Katrina\Exceptions\KatrinaException;
 use Katrina\Sql\KatrinaStatement;
+use SensitiveParameter;
 
 trait TableHandleTrait
 {
@@ -16,7 +17,7 @@ trait TableHandleTrait
      * 
      * @return self
      */
-    public static function createTable(string $table): self
+    public static function createTable(#[SensitiveParameter] string $table): self
     {
         self::$static_sql = "CREATE TABLE IF NOT EXISTS $table (";
         return new static;
@@ -60,14 +61,18 @@ trait TableHandleTrait
      * 
      * @return mixed
      */
-    public static function renameTable(string $new_name): mixed
+    public static function renameTable(#[SensitiveParameter] string $new_name): mixed
     {
         self::getBacktips();
 
         $class = get_called_class();
         $instance = new $class;
 
-        $table = (is_null($instance->table) ? strtolower(self::getClassWithoutNamespace($class)) : $instance->table);
+        $table = (
+            is_null($instance->table) ?
+            strtolower(self::getClassWithoutNamespace($class)) :
+            $instance->table
+        );
 
         self::$static_sql = "RENAME TABLE " . self::$backtips . $table . self::$backtips . " TO " . self::$backtips . $new_name . self::$backtips . ";";
         return KatrinaStatement::executePrepare(self::$static_sql);
@@ -85,7 +90,11 @@ trait TableHandleTrait
         $class = get_called_class();
         $instance = new $class;
 
-        $table = (is_null($instance->table) ? strtolower(self::getClassWithoutNamespace($class)) : $instance->table);
+        $table = (
+            is_null($instance->table) ? 
+            strtolower(self::getClassWithoutNamespace($class)) : 
+            $instance->table
+        );
 
         if ($check_foreign_key == true) {
             self::$static_sql = "SET FOREIGN_KEY_CHECKS=0;";
@@ -109,7 +118,11 @@ trait TableHandleTrait
         $class = get_called_class();
         $instance = new $class;
 
-        $table = (is_null($instance->table) ? strtolower(self::getClassWithoutNamespace($class)) : $instance->table);
+        $table = (
+            is_null($instance->table) ? 
+            strtolower(self::getClassWithoutNamespace($class)) : 
+            $instance->table
+        );
 
         self::$static_sql = "DESCRIBE " . $table;
         return KatrinaStatement::executeQuery(self::$static_sql, true);
@@ -143,7 +156,7 @@ trait TableHandleTrait
      * 
      * @return mixed
      */
-    public static function dropTable(string $table): mixed
+    public static function dropTable(#[SensitiveParameter] string $table): mixed
     {
         self::$static_sql = "DROP TABLE IF EXISTS $table;";
         return KatrinaStatement::executePrepare(self::$static_sql);
