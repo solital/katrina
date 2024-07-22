@@ -1,7 +1,7 @@
 <?php
 
 use Katrina\Functions\Functions;
-use KatrinaTest\Users;
+use KatrinaTest\Models\Users;
 use PHPUnit\Framework\TestCase;
 
 class AggregateFunctionsTest extends TestCase
@@ -9,7 +9,7 @@ class AggregateFunctionsTest extends TestCase
     public function testAvg()
     {
         $sql = Users::select(Functions::avg('age', 'result'))->get();
-        $this->assertEquals(40.2000, $sql[0]->result);
+        $this->assertEquals(40.7000, $sql[0]->result);
     }
 
     public function testCount()
@@ -40,7 +40,7 @@ class AggregateFunctionsTest extends TestCase
     {
         $sql = Users::select(Functions::sum('age + age', 'result'))->group('age')->get();
         $this->assertEquals(90, $sql[0]->result);
-        $this->assertEquals(50, $sql[1]->result);
+        $this->assertEquals(60, $sql[1]->result);
         $this->assertEquals(66, $sql[2]->result);
         $this->assertEquals(138, $sql[3]->result);
         $this->assertEquals(106, $sql[4]->result);

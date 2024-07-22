@@ -40,11 +40,7 @@ trait ExtendQueryTrait
     public static function call(string $procedure, array $params = null): self
     {
         $values = null;
-
-        if ($params) {
-            $values = implode(", ", $params);
-        }
-
+        if ($params) $values = implode(", ", $params);
         $sql = "CALL $procedure($values)";
         return KatrinaStatement::executePrepare($sql);
     }
@@ -56,23 +52,7 @@ trait ExtendQueryTrait
      */
     public function get(): mixed
     {
-        if (self::$config['cache'] == true) {
-            $cache_values = self::$cache_instance->get(self::$table_name);
-
-            if (!empty($cache_values) || $cache_values !== false) {
-                return $cache_values;
-            }
-        } else if (self::$config['cache'] == false) {
-            self::$cache_instance->delete(self::$table_name);
-        }
-
-        $result_values = KatrinaStatement::executeQuery(self::$static_sql, true);
-
-        if (self::$config['cache'] == true) {
-            self::$cache_instance->set(self::$table_name, $result_values);
-        }
-
-        return $result_values;
+        return $this->getAllOrUnique(true);
     }
 
     /**
@@ -82,22 +62,21 @@ trait ExtendQueryTrait
      */
     public function getUnique(): mixed
     {
+        return $this->getAllOrUnique(false);
+    }
+
+    private function getAllOrUnique(bool $all): mixed
+    {
         if (self::$config['cache'] == true) {
             $cache_values = self::$cache_instance->get(self::$table_name);
-
-            if (!empty($cache_values) || $cache_values !== false) {
-                return $cache_values;
-            }
+            if (!empty($cache_values) || $cache_values !== false) return $cache_values;
         } else if (self::$config['cache'] == false) {
             self::$cache_instance->delete(self::$table_name);
         }
 
-        $result_values = KatrinaStatement::executeQuery(self::$static_sql, false);
+        $result_values = KatrinaStatement::executeQuery(self::$static_sql, $all);
 
-        if (self::$config['cache'] == true) {
-            self::$cache_instance->set(self::$table_name, $result_values);
-        }
-
+        if (self::$config['cache'] == true) self::$cache_instance->set(self::$table_name, $result_values);
         return $result_values;
     }
 }

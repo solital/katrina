@@ -13,7 +13,7 @@ class Katrina
 {
     use PaginationTrait, ExtendQueryTrait, DataTypesTrait, TableHandleTrait, UuidTrait;
 
-    public const KATRINA_VERSION = "2.6.1";
+    public const KATRINA_VERSION = "2.6.2";
 
     /**
      * @var array
@@ -67,10 +67,7 @@ class Katrina
     {
         if ($this->table == null) $this->table = strtolower(self::getClassWithoutNamespace($this));
         if ($this->id == null) $this->id = 'id';
-
-        if ($this->uuid_increment === true && DB_CONFIG['DRIVE'] != "mysql") {
-            throw new KatrinaException("uuid is available only in MySQL");
-        }
+        if ($this->uuid_increment === true && DB_CONFIG['DRIVE'] != "mysql") throw new KatrinaException("uuid is available only in MySQL");
 
         $this->config();
         self::$cache_instance = new Cache(self::$config['cache']);
@@ -168,6 +165,7 @@ class Katrina
      */
     public function save(): mixed
     {
+        $bind_params = [];
         $new_content = $this->convertContent();
 
         if (isset($this->content[$this->id])) {
@@ -177,28 +175,39 @@ class Katrina
                 if ($key === $this->id || $key == $this->created_at || $key == $this->updated_at)
                     continue;
 
-                $sets[] = "{$key} = {$value}";
+                $sets[] = $key . " = :" . $key;
+                $bind_params[":" . $key] = str_replace("'", "", $value);
             }
 
-            if ($this->timestamp === true) {
-                $sets[] = $this->updated_at . " = '" . date('Y-m-d H:i:s') . "'";
-            }
+            $bind_params[":" . $this->id] = $this->content[$this->id];
+            if ($this->timestamp === true) $sets[] = $this->updated_at . " = '" . date('Y-m-d H:i:s') . "'";
 
-            $sql = "UPDATE {$this->table} SET " . implode(', ', $sets) . " WHERE {$this->id} = {$this->content[$this->id]};";
+            $sql = "UPDATE {$this->table} SET " . implode(', ', $sets) . " WHERE " . $this->id . " = :" . $this->id . ";";
         } else {
             if ($this->timestamp === true) {
                 $new_content[$this->created_at] = "'" . date('Y-m-d H:i:s') . "'";
                 $new_content[$this->updated_at] = "'" . date('Y-m-d H:i:s') . "'";
             }
 
-            if ($this->uuid_increment === true) {
-                $new_content[$this->id] = "'" . Uuid::v4()->toBinary() . "'";
+            if ($this->uuid_increment === true) $new_content[$this->id] = "'" . Uuid::v4()->toBinary() . "'";
+
+            foreach (array_keys($new_content) as $key => $value) {
+                $all_values[] = ":" . $value;
             }
 
-            $sql = "INSERT INTO {$this->table} (" . implode(', ', array_keys($new_content)) . ') VALUES (' . implode(',', array_values($new_content)) . ');';
+            foreach ($new_content as $key => $value) {
+                $bind_params[":" . $key] = str_replace("'", "", $value);
+            }
+
+            $sql = "INSERT INTO {$this->table} (" . implode(', ', array_keys($new_content)) . ') VALUES (' . implode(", ", $all_values) . ');';
         }
 
-        return KatrinaStatement::executePrepare($sql);
+        try {
+            $stmt = Connection::getInstance(self::$conn)->prepare($sql);
+            return $stmt->execute($bind_params);
+        } catch (KatrinaException $e) {
+            throw new KatrinaException($e->getMessage());
+        }
     }
 
     /**
@@ -241,18 +250,9 @@ class Katrina
      */
     private function format(mixed $value): string
     {
-        if (is_string($value) && !empty($value)) {
-            return "'" . addslashes($value) . "'";
-        }
-
-        if (is_bool($value)) {
-            return $value ? 'TRUE' : 'FALSE';
-        }
-
-        if ($value !== '') {
-            return $value;
-        }
-
+        if (is_string($value) && !empty($value)) return "'" . addslashes($value) . "'";
+        if (is_bool($value)) return $value ? 'TRUE' : 'FALSE';
+        if ($value !== '') return $value;
         return "NULL";
     }
 
@@ -264,9 +264,7 @@ class Katrina
         $newContent = [];
 
         foreach ($this->content as $key => $value) {
-            if (is_scalar($value)) {
-                $newContent[$key] = $this->format($value);
-            }
+            if (is_scalar($value)) $newContent[$key] = $this->format($value);
         }
 
         return $newContent;

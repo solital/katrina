@@ -30,7 +30,7 @@ class CreateUpdateTest extends TestCase
         $orm->address = 'Wall Street';
         $orm->phone = '+987654321';
         $orm->email = 'louis@email.com';
-        $orm->age = '38';
+        $orm->age = 38;
         $orm->save();
 
         $result = Users::select()->where('email', 'louis@email.com')->getUnique();

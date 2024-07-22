@@ -30,22 +30,14 @@ class MemcacheAdapter implements CacheAdapterInterface
      */
     public function connection(string $host, int $port): MemcacheAdapter
     {
-        if (extension_loaded('Memcache')) {
-            if (isset(DB_CACHE['CACHE_TTL'])) {
-                $this->ttl = DB_CACHE['CACHE_TTL'];
-            }
+        if (!extension_loaded('Memcache')) throw new CacheException("Extension Memcache not found");
+        if (isset(DB_CACHE['CACHE_TTL'])) $this->ttl = DB_CACHE['CACHE_TTL'];
 
-            $this->cache = new \Memcache();
-            $this->cache->addServer($host, $port);
+        $this->cache = new \Memcache();
+        $this->cache->addServer($host, $port);
 
-            if ($this->cache->getStats() == false) {
-                throw new CacheException("Not connected to memcache server");
-            }
-
-            return $this;
-        }
-
-        throw new CacheException("Extension Memcache not found");
+        if ($this->cache->getStats() == false) throw new CacheException("Not connected to memcache server");
+        return $this;
     }
 
     /**

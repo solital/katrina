@@ -145,7 +145,7 @@ trait TableHandleTrait
 
             return KatrinaStatement::executeQuery(self::$static_sql, true);
         } catch (KatrinaException $e) {
-            die(KatrinaException::class . ": " . $e->getMessage());
+            KatrinaException::class . ": " . $e->getMessage();
         }
     }
 

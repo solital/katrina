@@ -2,6 +2,7 @@
 
 namespace Katrina\Functions;
 
+use SensitiveParameter;
 use Symfony\Component\Uid\Uuid;
 use Katrina\Functions\Traits\{
     DateFunctionsTrait,
@@ -9,7 +10,6 @@ use Katrina\Functions\Traits\{
     MathFunctionsTrait,
     StringFunctionsTrait
 };
-use SensitiveParameter;
 
 class Functions
 {

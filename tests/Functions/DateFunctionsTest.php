@@ -1,7 +1,7 @@
 <?php
 
 use Katrina\Functions\Functions;
-use KatrinaTest\Users;
+use KatrinaTest\Models\Users;
 use PHPUnit\Framework\TestCase;
 
 date_default_timezone_set('America/Fortaleza');

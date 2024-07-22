@@ -10,7 +10,7 @@ define('DB_CONFIG', [
 ]);
 
 /* define('DB_CACHE', [
-    'CACHE_TYPE' => 'memcache',
+    'CACHE_TYPE' => 'memcached',
     'CACHE_HOST' => '127.0.0.1',
     'CACHE_PORT' => 11211,
     'CACHE_TTL' => 600
