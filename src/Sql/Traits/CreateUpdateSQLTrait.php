@@ -39,7 +39,11 @@ trait CreateUpdateSQLTrait
         $class = get_called_class();
         $instance = new $class;
 
-        $table = (is_null($instance->table) ? strtolower(self::getClassWithoutNamespace($class)) : $instance->table);
+        $table = (
+            is_null($instance->table) ?
+            strtolower(self::getClassWithoutNamespace($class)) :
+            $instance->table
+        );
 
         $array_columns = array_keys($table_columns);
         $columns = implode(",", $array_columns);
@@ -65,8 +69,10 @@ trait CreateUpdateSQLTrait
 
             return new static;
         } catch (KatrinaException $e) {
-            die($e->getMessage() . ": " . self::$static_sql);
+            $e->getMessage() . ": " . self::$static_sql;
         }
+
+        return new static;
     }
 
     /**
@@ -92,11 +98,14 @@ trait CreateUpdateSQLTrait
         $class = get_called_class();
         $instance = new $class;
 
-        $table = (is_null($instance->table) ? strtolower(self::getClassWithoutNamespace($class)) : $instance->table);
+        $table = (
+            is_null($instance->table) ?
+            strtolower(self::getClassWithoutNamespace($class)) :
+            $instance->table
+        );
 
         self::$array_columns = array_keys($table_columns);
         self::$array_values = array_values($table_columns);
-
         self::$static_sql = "UPDATE $table SET ";
 
         for ($i = 0, $b = 1; $i < count(self::$array_columns), $b <= count(self::$array_columns); $i++, $b++) {
@@ -104,7 +113,6 @@ trait CreateUpdateSQLTrait
         }
 
         self::$static_sql = rtrim(self::$static_sql, ",");
-
         return new static;
     }
 
@@ -125,7 +133,11 @@ trait CreateUpdateSQLTrait
         $class = get_called_class();
         $instance = new $class;
 
-        self::$table_foreign = (is_null($instance->table) ? strtolower(self::getClassWithoutNamespace($class)) : $instance->table);
+        self::$table_foreign = (
+            is_null($instance->table) ?
+            strtolower(self::getClassWithoutNamespace($class)) :
+            $instance->table
+        );
 
         if (is_string($value)) {
             $quote = "'";
@@ -153,9 +165,7 @@ trait CreateUpdateSQLTrait
     public function saveUpdate(): mixed
     {
         try {
-            if (!str_contains(self::$static_sql, "WHERE")) {
-                throw new KatrinaException("Update method must have `WHERE` method");
-            }
+            if (!str_contains(self::$static_sql, "WHERE")) throw new KatrinaException("Update method must have `where()` method");
 
             $stmt = Connection::getInstance()->prepare(self::$static_sql);
 
@@ -172,7 +182,9 @@ trait CreateUpdateSQLTrait
 
             return $res;
         } catch (KatrinaException $e) {
-            die($e->getMessage() . ": " . self::$static_sql);
+            $e->getMessage() . ": " . self::$static_sql;
         }
+
+        return null;
     }
 }

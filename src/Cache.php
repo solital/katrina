@@ -51,10 +51,7 @@ class Cache implements CacheAdapterInterface
      */
     public function get(string $key): mixed
     {
-        if ($this->cache != null) {
-            return $this->cache->get($key);
-        }
-
+        if ($this->cache != null) return $this->cache->get($key);
         return null;
     }
 
@@ -65,9 +62,7 @@ class Cache implements CacheAdapterInterface
      */
     public function set(string $key, mixed $data): void
     {
-        if ($this->cache != null) {
-            $this->cache->set($key, $data);
-        }
+        if ($this->cache != null) $this->cache->set($key, $data);
     }
 
     /**
@@ -77,8 +72,6 @@ class Cache implements CacheAdapterInterface
      */
     public function delete(string $key): void
     {
-        if ($this->cache != null) {
-            $this->cache->delete($key);
-        }
+        if ($this->cache != null) $this->cache->delete($key);
     }
 }

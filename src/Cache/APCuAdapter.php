@@ -13,9 +13,8 @@ class APCuAdapter implements CacheAdapterInterface
 
     public function __construct()
     {
-        if (!apcu_enabled()) {
-            throw new CacheException('Not connected to apcu cache');
-        }
+        if (!extension_loaded('apcu')) throw new CacheException("Extension Memcache not found");
+        if (!apcu_enabled()) throw new CacheException('Not connected to apcu cache');
 
         $this->ttl = DB_CACHE['CACHE_TTL'];
     }

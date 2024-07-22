@@ -1,5 +1,14 @@
 # Released Notes
 
+## v2.6.2 - (2024-07-22)
+
+### Fixed
+
+- Fixed SQL injection on Active Record mode
+- Fixed some code style
+
+------------------------------------------------------------------------
+
 ## v2.6.1 - (2024-07-17)
 
 ### Fixed

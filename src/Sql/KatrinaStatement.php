@@ -18,8 +18,10 @@ abstract class KatrinaStatement
      * @return mixed
      * @throws KatrinaException
      */
-    public static function executeQuery(#[SensitiveParameter] string $sql, ?bool $all): mixed
-    {
+    public static function executeQuery(
+        #[SensitiveParameter] string $sql,
+        #[SensitiveParameter] ?bool $all
+    ): mixed {
         $conn = self::checkConnection();
 
         try {

@@ -3,13 +3,15 @@
 namespace Katrina\Connection;
 
 use Katrina\Exceptions\ConnectionException;
+use PDO;
+use PDOException;
 
 class Connection
 {
     /**
-     * @var \PDO
+     * @var PDO
      */
-    private static \PDO $pdo;
+    private static PDO $pdo;
 
     /**
      * @var string
@@ -56,32 +58,24 @@ class Connection
      * 
      * @param null|string $drive Set database drive
      * 
-     * @return \PDO
+     * @return PDO
      * @throws ConnectionException
      */
-    public static function getInstance(?string $drive = null): \PDO
+    public static function getInstance(?string $drive = null): PDO
     {
         self::defineConfigConstants($drive);
-
-        if (!is_null($drive)) {
-            self::getConnection($drive);
-        } else {
-            self::getConnection(self::$db_drive);
-        }
-
-        if (empty(self::$dns)) {
-            throw new ConnectionException("Main database not configured. Check your '.env' file or constants");
-        }
+        (!is_null($drive)) ? self::getConnection($drive) : self::getConnection(self::$db_drive);
+        if (empty(self::$dns)) throw new ConnectionException("Main database not configured. Check your '.env' file or constants");
 
         if (!isset(self::$pdo)) {
             try {
-                self::$pdo = new \PDO(self::$dns, self::$db_user, self::$db_pass, self::$options);
-                self::$pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
-                self::$pdo->setAttribute(\PDO::ATTR_EMULATE_PREPARES, false);
+                self::$pdo = new PDO(self::$dns, self::$db_user, self::$db_pass, self::$options);
+                self::$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+                self::$pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
 
                 return self::$pdo;
-            } catch (\PDOException $e) {
-                throw new \PDOException("Database connection error: " . $e->getMessage());
+            } catch (PDOException $e) {
+                throw new PDOException("Database connection error: " . $e->getMessage());
             }
         }
 
@@ -96,22 +90,10 @@ class Connection
     private static function getConnection(string $drive): void
     {
         self::verifyExtensions($drive);
-
-        if ($drive == "mysql") {
-            self::connectionMySql($drive);
-        }
-
-        if ($drive == "pgsql") {
-            self::connectionPgSql($drive);
-        }
-
-        if ($drive == "oci") {
-            self::connectionOracle($drive);
-        }
-
-        if ($drive == "sqlite") {
-            self::connectionSqlite();
-        }
+        if ($drive == "mysql") self::connectionMySql($drive);
+        if ($drive == "pgsql") self::connectionPgSql($drive);
+        if ($drive == "oci") self::connectionOracle($drive);
+        if ($drive == "sqlite") self::connectionSqlite();
     }
 
     /**
@@ -124,22 +106,16 @@ class Connection
     private static function defineConfigConstants(?string $drive): void
     {
         if (!is_null($drive)) {
-            if (!defined('DB_CONFIG_SECONDARY')) {
-                throw new ConnectionException("Second database not configured. Check your '.env' file or constants");
-            }
+            if (!defined('DB_CONFIG_SECONDARY')) throw new ConnectionException("Second database not configured. Check your '.env' file or constant DB_CONFIG");
 
             self::$db_host = DB_CONFIG_SECONDARY['HOST'];
             self::$db_name = DB_CONFIG_SECONDARY['DBNAME'];
             self::$db_user = DB_CONFIG_SECONDARY['USER'];
             self::$db_pass = DB_CONFIG_SECONDARY['PASS'];
 
-            if (isset(DB_CONFIG_SECONDARY['SQLITE_DIR'])) {
-                self::$sqlite_dir = DB_CONFIG_SECONDARY['SQLITE_DIR'];
-            }
+            if (isset(DB_CONFIG_SECONDARY['SQLITE_DIR'])) self::$sqlite_dir = DB_CONFIG_SECONDARY['SQLITE_DIR'];
         } else {
-            if (!defined('DB_CONFIG')) {
-                throw new ConnectionException("Main database not configured. Check your '.env' file or constants");
-            }
+            if (!defined('DB_CONFIG')) throw new ConnectionException("Main database not configured. Check your '.env' file or constant DB_CONFIG");
 
             self::$db_drive = DB_CONFIG['DRIVE'];
             self::$db_host = DB_CONFIG['HOST'];
@@ -147,9 +123,7 @@ class Connection
             self::$db_user = DB_CONFIG['USER'];
             self::$db_pass = DB_CONFIG['PASS'];
 
-            if (isset(DB_CONFIG['SQLITE_DIR'])) {
-                self::$sqlite_dir = DB_CONFIG['SQLITE_DIR'];
-            }
+            if (isset(DB_CONFIG['SQLITE_DIR'])) self::$sqlite_dir = DB_CONFIG['SQLITE_DIR'];
         }
     }
 
@@ -161,7 +135,7 @@ class Connection
     private static function connectionMySql(string $drive): void
     {
         self::$dns = $drive . ":host=" . self::$db_host . ";dbname=" . self::$db_name . ";charset=utf8";
-        self::$options = [\PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8mb4"];
+        self::$options = [PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8mb4"];
     }
 
     /**
@@ -201,23 +175,12 @@ class Connection
     private static function verifyExtensions(string $drive): void
     {
         try {
-            if ($drive == "mysql" && !extension_loaded('pdo_mysql')) {
-                throw new ConnectionException("Extension for MySQL not installed or not enabled");
-            }
-
-            if ($drive == "pgsql" && !extension_loaded('pdo_pgsql')) {
-                throw new ConnectionException("Extension for PostgreSQL not installed or not enabled");
-            }
-
-            if ($drive == "sqlite" && !extension_loaded('pdo_sqlite')) {
-                throw new ConnectionException("Extension for SQLite not installed or not enabled");
-            }
-
-            if ($drive == "oci" && !extension_loaded('pdo_oci')) {
-                throw new ConnectionException("Extension for Oracle not installed or not enabled");
-            }
+            if ($drive == "mysql" && !extension_loaded('pdo_mysql')) throw new ConnectionException("Extension for MySQL not installed or not enabled");
+            if ($drive == "pgsql" && !extension_loaded('pdo_pgsql')) throw new ConnectionException("Extension for PostgreSQL not installed or not enabled");
+            if ($drive == "sqlite" && !extension_loaded('pdo_sqlite')) throw new ConnectionException("Extension for SQLite not installed or not enabled");
+            if ($drive == "oci" && !extension_loaded('pdo_oci')) throw new ConnectionException("Extension for Oracle not installed or not enabled");
         } catch (ConnectionException $e) {
-            die(ConnectionException::class . ": " . $e->getMessage());
+            ConnectionException::class . ": " . $e->getMessage();
         }
     }
 

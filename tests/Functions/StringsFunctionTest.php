@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-use KatrinaTest\Users;
 use PHPUnit\Framework\TestCase;
 use Katrina\Functions\Functions;
+use KatrinaTest\Models\Users;
 
 class StringsFunctionTest extends TestCase
 {

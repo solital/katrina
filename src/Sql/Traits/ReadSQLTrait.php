@@ -45,27 +45,25 @@ trait ReadSQLTrait
         $class = get_called_class();
         $instance = new $class;
 
-        $table = (is_null($instance->table) ? strtolower(self::getClassWithoutNamespace($class)) : $instance->table);
-        $id = (is_null($instance->id) ? 'id' : $instance->id);
+        $table = (
+            is_null($instance->table) ? 
+            strtolower(self::getClassWithoutNamespace($class)) : 
+            $instance->table
+        );
 
+        $id = (is_null($instance->id) ? 'id' : $instance->id);
         $sql = 'SELECT * FROM ' . $table . ' WHERE ' . $id . " = {$id_table} ;";
 
         if (self::$config['cache'] == true) {
             $cache_values = self::$cache_instance->get($instance->table);
-
-            if (!empty($cache_values) || $cache_values !== false) {
-                return $cache_values;
-            }
+            if (!empty($cache_values) || $cache_values !== false) return $cache_values;
         } else if (self::$config['cache'] == false) {
             self::$cache_instance->delete($instance->table);
         }
 
         $result_values = KatrinaStatement::executeQuery($sql, false);
 
-        if (self::$config['cache'] == true) {
-            self::$cache_instance->set($instance->table, $result_values);
-        }
-
+        if (self::$config['cache'] == true) self::$cache_instance->set($instance->table, $result_values);
         return $result_values;
     }
 
@@ -202,7 +200,6 @@ trait ReadSQLTrait
         self::$id_foreign = (is_null($instance->id) ? 'id' : $instance->id);
         self::$static_sql = "SELECT $columns FROM " . self::$table_foreign;
         self::$table_name = $instance->table;
-
         return new static;
     }
 
@@ -213,7 +210,7 @@ trait ReadSQLTrait
      * 
      * @return self
      */
-    public static function latest(#[SensitiveParameter] string $column = "created_at"): self
+    public static function latest(string $column = "created_at"): self
     {
         $class = get_called_class();
         $instance = new $class;
@@ -227,7 +224,6 @@ trait ReadSQLTrait
         self::$id_foreign = (is_null($instance->id) ? 'id' : $instance->id);
         self::$static_sql = "SELECT * FROM " . self::$table_foreign . " ORDER BY " . $column . " DESC";
         self::$table_name = $instance->table;
-
         return new static;
     }
 
@@ -258,13 +254,7 @@ trait ReadSQLTrait
     public function limit(int $rows, ?int $row_count = null): self
     {
         self::$static_sql = rtrim(self::$static_sql, ",");
-
-        if ($row_count !== null) {
-            self::$static_sql .= " LIMIT $rows, $row_count";
-        } else {
-            self::$static_sql .= " LIMIT $rows";
-        }
-
+        ($row_count !== null) ? self::$static_sql .= " LIMIT $rows, $row_count" : self::$static_sql .= " LIMIT $rows";
         return $this;
     }
 
@@ -279,7 +269,6 @@ trait ReadSQLTrait
     {
         self::$static_sql = rtrim(self::$static_sql, ",");
         self::$static_sql .= " LIKE '" . $like . "'";
-
         return $this;
     }
 
@@ -293,13 +282,9 @@ trait ReadSQLTrait
      */
     public function order(#[SensitiveParameter] string $column, bool $asc = true): self
     {
-        if ($asc == false) {
-            $this->growing = "DESC";
-        }
-
+        if ($asc == false) $this->growing = "DESC";
         self::$static_sql = rtrim(self::$static_sql, ",");
         self::$static_sql .= " ORDER BY " . $column . " " . $this->growing;
-
         return $this;
     }
 
@@ -317,7 +302,6 @@ trait ReadSQLTrait
     ): self {
         self::$static_sql = rtrim(self::$static_sql, ",");
         self::$static_sql .= " BETWEEN " . $first_value . " AND " . $second_value;
-
         return $this;
     }
 
@@ -332,7 +316,6 @@ trait ReadSQLTrait
     {
         self::$static_sql = rtrim(self::$static_sql, ",");
         self::$static_sql .= " GROUP BY " . $column;
-
         return $this;
     }
 

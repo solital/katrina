@@ -3,7 +3,6 @@
 namespace Katrina\Sql\Traits;
 
 use Katrina\Sql\KatrinaStatement;
-use SensitiveParameter;
 
 trait DataTypesTrait
 {
@@ -285,7 +284,7 @@ trait DataTypesTrait
      * 
      * @return self
      */
-    public function after(#[SensitiveParameter] string $column): self
+    public function after(string $column): self
     {
         $comma = substr(self::$static_sql, -1);
 
@@ -334,7 +333,7 @@ trait DataTypesTrait
      * 
      * @return self
      */
-    public function serial(#[SensitiveParameter] string $field): self
+    public function serial(string $field): self
     {
         self::getBacktips();
 

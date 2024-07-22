@@ -18,9 +18,7 @@ class YacAdapter implements CacheAdapterInterface
 
     public function __construct()
     {
-        if (!extension_loaded('yac')) {
-            throw new CacheException('YAC extension not found');
-        }
+        if (!extension_loaded('yac')) throw new CacheException('YAC extension not found');
 
         $this->yac = new \Yac();
         $this->ttl = DB_CACHE['CACHE_TTL'];
@@ -31,10 +29,19 @@ class YacAdapter implements CacheAdapterInterface
      * 
      * @return mixed
      */
-    #[\Override]
     public function get(string $key): mixed
     {
         return $this->yac->get($key);
+    }
+
+    /**
+     * @param mixed $data
+     * 
+     * @return void
+     */
+    public function set(string $key, mixed $data): void
+    {
+        $this->yac->set($key, $data, $this->ttl);
     }
 
     /**
@@ -42,15 +49,10 @@ class YacAdapter implements CacheAdapterInterface
      * 
      * @return bool
      */
-    #[\Override]
     public function has(string $key): bool
     {
         $value = $this->get($key);
-
-        if (!empty($value) || $value != false) {
-            return true;
-        }
-
+        if (!empty($value) || $value != false) return true;
         return false;
     }
 
@@ -59,7 +61,6 @@ class YacAdapter implements CacheAdapterInterface
      * 
      * @return void
      */
-    #[\Override]
     public function delete(string $key): void
     {
         $this->yac->delete($key);
@@ -71,7 +72,6 @@ class YacAdapter implements CacheAdapterInterface
      * 
      * @return mixed
      */
-    #[\Override]
     public function save(string $key, mixed $data): mixed
     {
         return $this->yac->set($key, $data, $this->ttl);

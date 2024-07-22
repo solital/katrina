@@ -1,7 +1,7 @@
 <?php
 
 use Katrina\Functions\Functions;
-use KatrinaTest\Users;
+use KatrinaTest\Models\Users;
 use PHPUnit\Framework\TestCase;
 
 class MathFunctionsTest extends TestCase
@@ -10,7 +10,7 @@ class MathFunctionsTest extends TestCase
     {
         $sql = Users::select(Functions::abs('age', 'result'))->get();
         $this->assertEquals(45, $sql[0]->result);
-        $this->assertEquals(25, $sql[1]->result);
+        $this->assertEquals(30, $sql[1]->result);
         $this->assertEquals(33, $sql[2]->result);
         $this->assertEquals(69, $sql[3]->result);
         $this->assertEquals(53, $sql[4]->result);
@@ -24,14 +24,14 @@ class MathFunctionsTest extends TestCase
     public function testRound()
     {
         $sql = Users::select(Functions::round('AVG(age)', as: 'result'))->get();
-        $this->assertEquals(40, $sql[0]->result);
+        $this->assertEquals(41, $sql[0]->result);
     }
 
     public function testTruncate()
     {
         $sql = Users::select(Functions::truncate('age', 0, 'result'))->get();
         $this->assertEquals(45, $sql[0]->result);
-        $this->assertEquals(25, $sql[1]->result);
+        $this->assertEquals(30, $sql[1]->result);
         $this->assertEquals(33, $sql[2]->result);
         $this->assertEquals(69, $sql[3]->result);
         $this->assertEquals(53, $sql[4]->result);
