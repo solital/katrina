@@ -9,12 +9,12 @@ define('DB_CONFIG', [
     'PASS' => ''
 ]);
 
-/* define('DB_CACHE', [
-    'CACHE_TYPE' => 'memcached',
+define('DB_CACHE', [
+    'CACHE_TYPE' => 'apcu',
     'CACHE_HOST' => '127.0.0.1',
     'CACHE_PORT' => 11211,
     'CACHE_TTL' => 600
-]); */
+]);
 
 # SECOND DATABASE
 define('DB_CONFIG_SECONDARY', [

@@ -3,15 +3,16 @@
 namespace Katrina\Connection;
 
 use Katrina\Exceptions\ConnectionException;
+use ModernPHPException\Console\CliMessage;
 use PDO;
 use PDOException;
 
 class Connection
 {
     /**
-     * @var PDO
+     * @var LazyPDO|PDO
      */
-    private static PDO $pdo;
+    private static LazyPDO|PDO $pdo;
 
     /**
      * @var string
@@ -69,12 +70,16 @@ class Connection
 
         if (!isset(self::$pdo)) {
             try {
-                self::$pdo = new PDO(self::$dns, self::$db_user, self::$db_pass, self::$options);
+                self::$pdo = new LazyPDO(self::$dns, self::$db_user, self::$db_pass, self::$options);
                 self::$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
                 self::$pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
 
                 return self::$pdo;
             } catch (PDOException $e) {
+                self::$pdo->onConnectionError(function ($e) {
+                    CliMessage::error("Katrina ORM Fatal error: " . $e->getMessage())->print()->exit();
+                });
+
                 throw new PDOException("Database connection error: " . $e->getMessage());
             }
         }
@@ -184,11 +189,7 @@ class Connection
         }
     }
 
-    private function __construct()
-    {
-    }
+    private function __construct() {}
 
-    private function __clone()
-    {
-    }
+    private function __clone() {}
 }
