@@ -1,5 +1,13 @@
 # Released Notes
 
+## v2.6.3 - (2024-07-24)
+
+### Improved
+
+- Improved PDO instance with `LazyPDO` class
+
+------------------------------------------------------------------------
+
 ## v2.6.2 - (2024-07-22)
 
 ### Fixed

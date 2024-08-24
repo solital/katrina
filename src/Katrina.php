@@ -6,14 +6,13 @@ use SensitiveParameter;
 use Symfony\Component\Uid\Uuid;
 use Katrina\Connection\Connection;
 use Katrina\Exceptions\KatrinaException;
-use Katrina\Sql\KatrinaStatement;
 use Katrina\Sql\Traits\{PaginationTrait, ExtendQueryTrait, DataTypesTrait, TableHandleTrait, UuidTrait};
 
 class Katrina
 {
     use PaginationTrait, ExtendQueryTrait, DataTypesTrait, TableHandleTrait, UuidTrait;
 
-    public const KATRINA_VERSION = "2.6.2";
+    public const KATRINA_VERSION = "2.6.3";
 
     /**
      * @var array
