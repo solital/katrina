@@ -12,7 +12,7 @@ class Katrina
 {
     use PaginationTrait, ExtendQueryTrait, DataTypesTrait, TableHandleTrait, UuidTrait;
 
-    public const KATRINA_VERSION = "2.6.3";
+    public const KATRINA_VERSION = "2.6.4";
 
     /**
      * @var array

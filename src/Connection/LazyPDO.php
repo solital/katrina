@@ -32,7 +32,7 @@ class LazyPDO extends PDO
     /**
      * @var array
      */
-    private array $options;
+    private ?array $options;
 
     /**
      * @var mixed|null
@@ -56,7 +56,7 @@ class LazyPDO extends PDO
         string $dsn,
         ?string $user = null,
         #[SensitiveParameter] ?string $password = null,
-        array $options = []
+        ?array $options = null
     ) {
         $this->pdo_conn = null;
         $this->dsn = $dsn;
@@ -118,7 +118,7 @@ class LazyPDO extends PDO
     /**
      * Connect, if the connection has not been established already
      */
-    public function connect()
+    public function getConnecttion()
     {
         if (!$this->isConnected()) {
             try {
@@ -151,7 +151,7 @@ class LazyPDO extends PDO
      */
     public function beginTransaction(): bool
     {
-        $this->connect();
+        $this->getConnecttion();
         return $this->pdo_conn->beginTransaction();
     }
 
@@ -160,7 +160,7 @@ class LazyPDO extends PDO
      */
     public function commit(): bool
     {
-        $this->connect();
+        $this->getConnecttion();
         return $this->pdo_conn->commit();
     }
 
@@ -169,7 +169,7 @@ class LazyPDO extends PDO
      */
     public function rollBack(): bool
     {
-        $this->connect();
+        $this->getConnecttion();
         return $this->pdo_conn->rollBack();
     }
 
@@ -178,7 +178,7 @@ class LazyPDO extends PDO
      */
     public function inTransaction(): bool
     {
-        $this->connect();
+        $this->getConnecttion();
         return $this->pdo_conn->inTransaction();
     }
 
@@ -187,7 +187,7 @@ class LazyPDO extends PDO
      */
     public function errorCode(): ?string
     {
-        $this->connect();
+        $this->getConnecttion();
         return $this->pdo_conn->errorCode();
     }
 
@@ -196,7 +196,7 @@ class LazyPDO extends PDO
      */
     public function errorInfo(): array
     {
-        $this->connect();
+        $this->getConnecttion();
         return $this->pdo_conn->errorInfo();
     }
 
@@ -205,7 +205,7 @@ class LazyPDO extends PDO
      */
     public function exec(string $statement): int|false
     {
-        $this->connect();
+        $this->getConnecttion();
         return $this->pdo_conn->exec($statement);
     }
 
@@ -214,7 +214,7 @@ class LazyPDO extends PDO
      */
     public function getAttribute(int $attribute): mixed
     {
-        $this->connect();
+        $this->getConnecttion();
         return $this->pdo_conn->getAttribute($attribute);
     }
 
@@ -223,7 +223,7 @@ class LazyPDO extends PDO
      */
     public function setAttribute(int $attribute, mixed $value): bool
     {
-        $this->connect();
+        $this->getConnecttion();
         return $this->pdo_conn->setAttribute($attribute, $value);
     }
 
@@ -240,7 +240,7 @@ class LazyPDO extends PDO
      */
     public function lastInsertId(?string $name = null): string|false
     {
-        $this->connect();
+        $this->getConnecttion();
         return $this->pdo_conn->lastInsertId($name);
     }
 
@@ -249,7 +249,7 @@ class LazyPDO extends PDO
      */
     public function prepare(string $statement, array $options = []): PDOStatement|false
     {
-        $this->connect();
+        $this->getConnecttion();
         if (!is_array($options)) $options = [];
         return $this->pdo_conn->prepare($statement, $options);
     }
@@ -263,7 +263,7 @@ class LazyPDO extends PDO
         array and unpack it. This is because there seems to be several implementations of the
         query() method in native PDO, and calling it with the arguments as passed to this function
         almost always returns an error. This fixes it. */
-        $this->connect();
+        $this->getConnecttion();
         $args = func_get_args();
         return $this->pdo_conn->query(...$args);
     }
@@ -273,7 +273,7 @@ class LazyPDO extends PDO
      */
     public function quote(string $string, int $parameter_type = parent::PARAM_STR): string|false
     {
-        $this->connect();
+        $this->getConnecttion();
         return $this->pdo_conn->quote($string, $parameter_type);
     }
 }

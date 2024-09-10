@@ -37,8 +37,8 @@ trait PaginationTrait
     public function pagination(
         #[SensitiveParameter] string $table,
         int $limit,
-        #[SensitiveParameter] array $innerjoin = null,
-        #[SensitiveParameter] string $where = null
+        #[SensitiveParameter] ?array $innerjoin = null,
+        #[SensitiveParameter] ?string $where = null
     ): self {
         if ($limit == 0 || $limit <= 0) throw new PaginationException("Error in 'pagination(): Division by zero'");
         $this->pg = (isset($_GET['page'])) ? (int)$_GET['page'] : 1;

@@ -37,7 +37,7 @@ trait ExtendQueryTrait
      * 
      * @return self
      */
-    public static function call(string $procedure, array $params = null): self
+    public static function call(string $procedure, ?array $params = null): self
     {
         $values = null;
         if ($params) $values = implode(", ", $params);
