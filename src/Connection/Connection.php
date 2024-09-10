@@ -75,12 +75,12 @@ class Connection
                 self::$pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
 
                 return self::$pdo;
-            } catch (PDOException $e) {
+            } catch (\Exception $e) {
                 self::$pdo->onConnectionError(function ($e) {
                     CliMessage::error("Katrina ORM Fatal error: " . $e->getMessage())->print()->exit();
                 });
 
-                throw new PDOException("Database connection error: " . $e->getMessage());
+                throw new ConnectionException("Database connection error: " . $e->getMessage());
             }
         }
 
